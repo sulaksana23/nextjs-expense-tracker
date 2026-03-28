@@ -9,11 +9,18 @@
 </p>
 
 <p align="center">
+  <a href="https://your-project-name.vercel.app"><strong>Live Demo</strong></a> ·
   <a href="#fitur-utama"><strong>Features</strong></a> ·
   <a href="#tech-stack"><strong>Tech Stack</strong></a> ·
   <a href="#menjalankan-secara-lokal"><strong>Local Setup</strong></a> ·
   <a href="#struktur-proyek"><strong>Project Structure</strong></a>
 </p>
+
+## Live Demo
+
+Demo online dapat diakses di Vercel:
+
+`https://your-project-name.vercel.app`
 
 ## Ringkasan
 
@@ -35,6 +42,26 @@ sampai menengah.
 - Form transaksi untuk pemasukan dan pengeluaran dengan kategori bawaan.
 - Filter kategori untuk memfokuskan daftar transaksi yang sedang dilihat.
 - Rendering data dari server menggunakan Next.js App Router dan Server Actions.
+
+## Preview Tampilan
+
+### Login
+
+<p>
+  <img src="./public/readme-login.svg" alt="Preview halaman login Expense Tracker" width="100%" />
+</p>
+
+### Register
+
+<p>
+  <img src="./public/readme-register.svg" alt="Preview halaman register Expense Tracker" width="100%" />
+</p>
+
+### Dashboard
+
+<p>
+  <img src="./public/readme-dashboard.svg" alt="Preview halaman dashboard Expense Tracker" width="100%" />
+</p>
 
 ## Tech Stack
 

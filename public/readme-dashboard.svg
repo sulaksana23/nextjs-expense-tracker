@@ -1,0 +1,73 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="89" y1="41" x2="1114" y2="706" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF9F2"/>
+      <stop offset="0.48" stop-color="#F6EFE6"/>
+      <stop offset="1" stop-color="#EDF3F7"/>
+    </linearGradient>
+    <radialGradient id="g1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(187 96) rotate(36.8) scale(351.425 228.244)">
+      <stop stop-color="#FB923C" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#FB923C" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1024 648) rotate(-145.8) scale(379.812 248.884)">
+      <stop stop-color="#10B981" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#10B981" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="760" rx="32" fill="url(#bg)"/>
+  <rect width="1200" height="760" rx="32" fill="url(#g1)"/>
+  <rect width="1200" height="760" rx="32" fill="url(#g2)"/>
+
+  <rect x="64" y="66" width="1072" height="138" rx="34" fill="white" fill-opacity="0.84" stroke="black" stroke-opacity="0.06"/>
+  <rect x="64" y="224" width="248" height="114" rx="28" fill="white" fill-opacity="0.86" stroke="black" stroke-opacity="0.05"/>
+  <rect x="328" y="224" width="248" height="114" rx="28" fill="white" fill-opacity="0.86" stroke="black" stroke-opacity="0.05"/>
+  <rect x="592" y="224" width="248" height="114" rx="28" fill="white" fill-opacity="0.86" stroke="black" stroke-opacity="0.05"/>
+  <rect x="856" y="224" width="280" height="114" rx="28" fill="white" fill-opacity="0.86" stroke="black" stroke-opacity="0.05"/>
+
+  <rect x="64" y="362" width="444" height="328" rx="32" fill="#101B2D"/>
+  <rect x="532" y="362" width="604" height="328" rx="32" fill="white" fill-opacity="0.84" stroke="black" stroke-opacity="0.06"/>
+
+  <rect x="98" y="96" width="176" height="34" rx="17" fill="#FFF0DD"/>
+  <text x="186" y="118" text-anchor="middle" fill="#EF6C2F" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" letter-spacing="2">DASHBOARD KEUANGAN</text>
+  <text x="98" y="166" fill="#0F172A" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="700">Halo, Bayu</text>
+  <text x="98" y="196" fill="#475569" font-family="Arial, Helvetica, sans-serif" font-size="18">Catat pemasukan dan pengeluaran harian dalam satu tampilan.</text>
+
+  <rect x="991" y="98" width="115" height="48" rx="18" fill="#0F172A"/>
+  <text x="1048" y="128" text-anchor="middle" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">Logout</text>
+
+  <text x="88" y="255" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="14">Total Balance</text>
+  <text x="88" y="303" fill="#059669" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700">Rp12.450.000</text>
+  <text x="352" y="255" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="14">Total Income</text>
+  <text x="352" y="303" fill="#059669" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700">Rp18.900.000</text>
+  <text x="616" y="255" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="14">Total Expense</text>
+  <text x="616" y="303" fill="#E11D48" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700">Rp6.450.000</text>
+  <text x="880" y="255" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="14">Filter Semua</text>
+  <text x="880" y="303" fill="#0369A1" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700">14 transaksi</text>
+
+  <text x="98" y="410" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700">Tambah transaksi</text>
+  <text x="98" y="442" fill="white" fill-opacity="0.65" font-family="Arial, Helvetica, sans-serif" font-size="16">Tambah income atau expense ke akun kamu.</text>
+  <rect x="98" y="470" width="174" height="48" rx="16" fill="white"/>
+  <rect x="284" y="470" width="174" height="48" rx="16" fill="white" fill-opacity="0.06" stroke="white" stroke-opacity="0.1"/>
+  <text x="185" y="500" text-anchor="middle" fill="#0F172A" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700">Pengeluaran</text>
+  <text x="371" y="500" text-anchor="middle" fill="white" fill-opacity="0.72" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700">Pemasukan</text>
+  <rect x="98" y="540" width="360" height="52" rx="18" fill="white" fill-opacity="0.06" stroke="white" stroke-opacity="0.1"/>
+  <text x="122" y="572" fill="white" fill-opacity="0.35" font-family="Arial, Helvetica, sans-serif" font-size="15">Judul transaksi</text>
+  <rect x="98" y="608" width="170" height="52" rx="18" fill="white" fill-opacity="0.06" stroke="white" stroke-opacity="0.1"/>
+  <rect x="288" y="608" width="170" height="52" rx="18" fill="white" fill-opacity="0.06" stroke="white" stroke-opacity="0.1"/>
+  <text x="122" y="640" fill="white" fill-opacity="0.35" font-family="Arial, Helvetica, sans-serif" font-size="15">Nominal</text>
+  <text x="312" y="640" fill="white" fill-opacity="0.35" font-family="Arial, Helvetica, sans-serif" font-size="15">Tanggal</text>
+
+  <text x="566" y="410" fill="#0F172A" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700">List transaksi</text>
+  <text x="566" y="442" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="16">Pantau aktivitas terbaru dan fokus pada kategori tertentu.</text>
+  <rect x="566" y="474" width="118" height="40" rx="14" fill="#FFF0DD"/>
+  <text x="625" y="500" text-anchor="middle" fill="#C2410C" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700">Semua</text>
+
+  <rect x="566" y="536" width="536" height="62" rx="22" fill="white"/>
+  <rect x="566" y="610" width="536" height="62" rx="22" fill="white"/>
+  <text x="590" y="563" fill="#334155" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Gaji bulanan</text>
+  <text x="590" y="586" fill="#94A3B8" font-family="Arial, Helvetica, sans-serif" font-size="14">Gaji • 27 Mar 2026</text>
+  <text x="954" y="575" fill="#059669" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">+Rp8.000.000</text>
+  <text x="590" y="637" fill="#334155" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Belanja mingguan</text>
+  <text x="590" y="660" fill="#94A3B8" font-family="Arial, Helvetica, sans-serif" font-size="14">Belanja • 26 Mar 2026</text>
+  <text x="958" y="649" fill="#E11D48" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">-Rp450.000</text>
+</svg>
