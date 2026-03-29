@@ -25,6 +25,8 @@ type DashboardClientProps = {
   transactions: TransactionView[];
 };
 
+type TransactionTypeFilter = TransactionType | "ALL";
+
 const incomeCategories = ["Gaji", "Freelance", "Bonus", "Investasi", "Lainnya"];
 const expenseCategories = [
   "Makan",
@@ -51,6 +53,13 @@ function formatDate(value: string) {
     day: "2-digit",
     month: "short",
     year: "numeric",
+  }).format(new Date(value));
+}
+
+function formatShortDate(value: string) {
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "short",
   }).format(new Date(value));
 }
 
@@ -87,7 +96,11 @@ export default function DashboardClient({
   const [type, setType] = useState<TransactionType>("EXPENSE");
   const [amountInput, setAmountInput] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
+  const [selectedTypeFilter, setSelectedTypeFilter] =
+    useState<TransactionTypeFilter>("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
   const deferredCategory = useDeferredValue(selectedCategory);
+  const deferredSearchQuery = useDeferredValue(searchQuery.trim().toLowerCase());
   const [transactionState, transactionAction] = useActionState(
     createTransactionAction,
     initialTransactionState,
@@ -104,14 +117,36 @@ export default function DashboardClient({
   }, [transactions]);
 
   const filteredTransactions = useMemo(() => {
-    if (deferredCategory === "Semua") {
-      return transactions;
-    }
+    return transactions.filter((transaction) => {
+      if (
+        deferredCategory !== "Semua" &&
+        transaction.category !== deferredCategory
+      ) {
+        return false;
+      }
 
-    return transactions.filter(
-      (transaction) => transaction.category === deferredCategory,
-    );
-  }, [deferredCategory, transactions]);
+      if (
+        selectedTypeFilter !== "ALL" &&
+        transaction.type !== selectedTypeFilter
+      ) {
+        return false;
+      }
+
+      if (!deferredSearchQuery) {
+        return true;
+      }
+
+      const haystack = [
+        transaction.title,
+        transaction.category,
+        transaction.note ?? "",
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return haystack.includes(deferredSearchQuery);
+    });
+  }, [deferredCategory, deferredSearchQuery, selectedTypeFilter, transactions]);
 
   const totals = useMemo(() => {
     return transactions.reduce(
@@ -148,6 +183,98 @@ export default function DashboardClient({
     type === "INCOME" ? incomeCategories : expenseCategories;
   const activeCategoryLabel =
     deferredCategory === "Semua" ? "Semua kategori" : deferredCategory;
+  const activeTypeLabel =
+    selectedTypeFilter === "ALL"
+      ? "Semua tipe"
+      : selectedTypeFilter === "INCOME"
+        ? "Pemasukan"
+        : "Pengeluaran";
+
+  const expenseByCategory = useMemo(() => {
+    const grouped = filteredTransactions.reduce(
+      (accumulator, transaction) => {
+        if (transaction.type !== "EXPENSE") {
+          return accumulator;
+        }
+
+        accumulator.set(
+          transaction.category,
+          (accumulator.get(transaction.category) ?? 0) + transaction.amount,
+        );
+
+        return accumulator;
+      },
+      new Map<string, number>(),
+    );
+
+    return Array.from(grouped.entries())
+      .map(([category, amount]) => ({ category, amount }))
+      .sort((left, right) => right.amount - left.amount)
+      .slice(0, 5);
+  }, [filteredTransactions]);
+
+  const highlightMetrics = useMemo(() => {
+    const totalAmount = filteredTransactions.reduce(
+      (sum, transaction) => sum + transaction.amount,
+      0,
+    );
+    const averageAmount =
+      filteredTransactions.length > 0 ? totalAmount / filteredTransactions.length : 0;
+    const largestTransaction = filteredTransactions.reduce<TransactionView | null>(
+      (currentLargest, transaction) => {
+        if (!currentLargest || transaction.amount > currentLargest.amount) {
+          return transaction;
+        }
+
+        return currentLargest;
+      },
+      null,
+    );
+
+    const now = new Date();
+    const currentMonthKey = `${now.getFullYear()}-${now.getMonth()}`;
+    let currentMonthIncome = 0;
+    let currentMonthExpense = 0;
+    let recentTransactions = 0;
+
+    for (const transaction of filteredTransactions) {
+      const occurredAt = new Date(transaction.occurredAt);
+      const transactionMonthKey = `${occurredAt.getFullYear()}-${occurredAt.getMonth()}`;
+      const diffInDays =
+        (now.getTime() - occurredAt.getTime()) / (1000 * 60 * 60 * 24);
+
+      if (diffInDays <= 30) {
+        recentTransactions += 1;
+      }
+
+      if (transactionMonthKey === currentMonthKey) {
+        if (transaction.type === "INCOME") {
+          currentMonthIncome += transaction.amount;
+        } else {
+          currentMonthExpense += transaction.amount;
+        }
+      }
+    }
+
+    const savingsRate =
+      currentMonthIncome > 0
+        ? Math.max(
+            0,
+            Math.round(
+              ((currentMonthIncome - currentMonthExpense) / currentMonthIncome) * 100,
+            ),
+          )
+        : 0;
+
+    return {
+      averageAmount,
+      currentMonthIncome,
+      currentMonthExpense,
+      largestTransaction,
+      recentTransactions,
+      savingsRate,
+    };
+  }, [filteredTransactions]);
 
   return (
     <div className="min-h-screen bg-[var(--background)] px-3 py-3 text-slate-900 sm:px-4 sm:py-4 md:px-6 md:py-6">
@@ -355,20 +482,32 @@ export default function DashboardClient({
                 </p>
               </div>
 
-              <label className="grid w-full gap-2 text-sm text-slate-500 lg:w-auto lg:min-w-52">
-                <span>Filter kategori</span>
-                <select
-                  value={selectedCategory}
-                  onChange={(event) => setSelectedCategory(event.target.value)}
-                  className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-slate-400"
-                >
-                  {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <div className="grid w-full gap-3 lg:w-auto lg:min-w-72">
+                <label className="grid gap-2 text-sm text-slate-500">
+                  <span>Cari transaksi</span>
+                  <input
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Cari judul, kategori, atau catatan"
+                    className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
+                  />
+                </label>
+
+                <label className="grid gap-2 text-sm text-slate-500">
+                  <span>Filter kategori</span>
+                  <select
+                    value={selectedCategory}
+                    onChange={(event) => setSelectedCategory(event.target.value)}
+                    className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-slate-400"
+                  >
+                    {categories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
             </div>
 
             <div className="mt-4 grid gap-3 rounded-xl bg-[var(--surface-soft)] p-3 sm:p-4">
@@ -376,9 +515,35 @@ export default function DashboardClient({
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
                   Ringkasan filter
                 </p>
-                <span className="rounded-full border border-[var(--border-soft)] bg-white px-3 py-1 text-xs text-slate-600">
-                  {activeCategoryLabel}
-                </span>
+                <div className="flex flex-wrap gap-2">
+                  <span className="rounded-full border border-[var(--border-soft)] bg-white px-3 py-1 text-xs text-slate-600">
+                    {activeCategoryLabel}
+                  </span>
+                  <span className="rounded-full border border-[var(--border-soft)] bg-white px-3 py-1 text-xs text-slate-600">
+                    {activeTypeLabel}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { label: "Semua", value: "ALL" as const },
+                  { label: "Pemasukan", value: "INCOME" as const },
+                  { label: "Pengeluaran", value: "EXPENSE" as const },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setSelectedTypeFilter(option.value)}
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                      selectedTypeFilter === option.value
+                        ? "bg-slate-900 text-white"
+                        : "border border-[var(--border-soft)] bg-white text-slate-600 hover:border-slate-300"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -478,6 +643,120 @@ export default function DashboardClient({
           <div className="pt-5">
             <TransactionsChart transactions={transactions} />
           </div>
+        </section>
+
+        <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 sm:p-5">
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold text-slate-900">Insight cepat</h2>
+              <p className="text-sm leading-6 text-slate-500">
+                Ringkasan otomatis dari transaksi yang sedang tampil di dashboard.
+              </p>
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  Rata-rata transaksi
+                </p>
+                <p className="pt-2 text-lg font-semibold text-slate-900">
+                  {formatCurrency(highlightMetrics.averageAmount)}
+                </p>
+              </article>
+
+              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  Aktivitas 30 hari
+                </p>
+                <p className="pt-2 text-lg font-semibold text-slate-900">
+                  {highlightMetrics.recentTransactions} transaksi
+                </p>
+              </article>
+
+              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  Saving rate bulan ini
+                </p>
+                <p className="pt-2 text-lg font-semibold text-emerald-600">
+                  {highlightMetrics.savingsRate}%
+                </p>
+                <p className="pt-1 text-sm text-slate-500">
+                  Income {formatCurrency(highlightMetrics.currentMonthIncome)}
+                </p>
+              </article>
+
+              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  Transaksi terbesar
+                </p>
+                <p className="pt-2 text-lg font-semibold text-slate-900">
+                  {highlightMetrics.largestTransaction
+                    ? formatCurrency(highlightMetrics.largestTransaction.amount)
+                    : "Belum ada data"}
+                </p>
+                <p className="pt-1 text-sm text-slate-500">
+                  {highlightMetrics.largestTransaction
+                    ? `${highlightMetrics.largestTransaction.title} • ${formatShortDate(
+                        highlightMetrics.largestTransaction.occurredAt,
+                      )}`
+                    : "Tambahkan transaksi pertama untuk melihat insight ini."}
+                </p>
+              </article>
+            </div>
+          </article>
+
+          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 sm:p-5">
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold text-slate-900">Kategori pengeluaran</h2>
+              <p className="text-sm leading-6 text-slate-500">
+                Kategori paling dominan dari transaksi yang sedang difilter.
+              </p>
+            </div>
+
+            <div className="mt-5 grid gap-3">
+              {expenseByCategory.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center text-sm text-slate-500">
+                  Belum ada pengeluaran pada filter ini.
+                </div>
+              ) : (
+                expenseByCategory.map((item, index) => {
+                  const maxAmount = expenseByCategory[0]?.amount ?? 1;
+                  const widthPercentage = Math.max(
+                    18,
+                    Math.round((item.amount / maxAmount) * 100),
+                  );
+
+                  return (
+                    <div
+                      key={item.category}
+                      className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-slate-900">
+                            {index + 1}. {item.category}
+                          </p>
+                          <p className="pt-1 text-sm text-slate-500">
+                            {formatCurrency(item.amount)}
+                          </p>
+                        </div>
+                        <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600">
+                          Dominan
+                        </span>
+                      </div>
+
+                      <div className="mt-3 h-2 overflow-hidden rounded-full bg-white">
+                        <div
+                          className="h-full rounded-full bg-rose-500"
+                          style={{ width: `${widthPercentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </article>
         </section>
       </div>
     </div>

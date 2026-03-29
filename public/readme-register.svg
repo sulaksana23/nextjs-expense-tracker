@@ -1,65 +1,85 @@
 <svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="94" y1="54" x2="1121" y2="698" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#07111F"/>
-      <stop offset="0.54" stop-color="#10213A"/>
-      <stop offset="1" stop-color="#18273D"/>
+    <linearGradient id="bg" x1="88" y1="40" x2="1116" y2="716" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF9F2"/>
+      <stop offset="0.46" stop-color="#F6EFE5"/>
+      <stop offset="1" stop-color="#EEF4F8"/>
     </linearGradient>
-    <radialGradient id="g1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(186 128) rotate(38.7) scale(354.988 239.217)">
-      <stop stop-color="#FFAE5C" stop-opacity="0.4"/>
-      <stop offset="1" stop-color="#FFAE5C" stop-opacity="0"/>
+    <radialGradient id="g1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(190 124) rotate(34.4) scale(350.955 231.333)">
+      <stop stop-color="#FB923C" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#FB923C" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="g2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1028 604) rotate(-145.516) scale(360.055 247.448)">
-      <stop stop-color="#2563EB" stop-opacity="0.28"/>
-      <stop offset="1" stop-color="#2563EB" stop-opacity="0"/>
+    <radialGradient id="g2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1016 642) rotate(-144.4) scale(374.674 245.305)">
+      <stop stop-color="#10B981" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#10B981" stop-opacity="0"/>
     </radialGradient>
   </defs>
+
   <rect width="1200" height="760" rx="32" fill="url(#bg)"/>
   <rect width="1200" height="760" rx="32" fill="url(#g1)"/>
   <rect width="1200" height="760" rx="32" fill="url(#g2)"/>
 
-  <rect x="62" y="70" width="650" height="620" rx="34" fill="white" fill-opacity="0.06" stroke="white" stroke-opacity="0.1"/>
-  <rect x="746" y="80" width="392" height="600" rx="34" fill="#0D1728" fill-opacity="0.94" stroke="white" stroke-opacity="0.12"/>
+  <rect x="64" y="70" width="646" height="620" rx="34" fill="white" fill-opacity="0.84" stroke="black" stroke-opacity="0.06"/>
+  <rect x="742" y="86" width="320" height="578" rx="34" fill="white" fill-opacity="0.9" stroke="black" stroke-opacity="0.06"/>
+  <rect x="1082" y="168" width="86" height="420" rx="30" fill="#0F172A" fill-opacity="0.96"/>
 
-  <rect x="110" y="112" width="182" height="40" rx="20" fill="white" fill-opacity="0.08" stroke="white" stroke-opacity="0.12"/>
-  <text x="201" y="138" text-anchor="middle" fill="#FFB86A" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" letter-spacing="4">EXPENSE TRACKER</text>
+  <rect x="110" y="112" width="188" height="40" rx="20" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="204" y="138" text-anchor="middle" fill="#334155" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" letter-spacing="3">EXPENSE TRACKER</text>
 
-  <text x="110" y="220" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="700">
-    <tspan x="110" dy="0">Mulai catat finansial</tspan>
-    <tspan x="110" dy="64">harian dengan alur</tspan>
-    <tspan x="110" dy="64">yang cepat dan rapi.</tspan>
+  <text x="110" y="220" fill="#0F172A" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="700">
+    <tspan x="110" dy="0">Register yang cepat,</tspan>
+    <tspan x="110" dy="62">langsung siap pakai</tspan>
+    <tspan x="110" dy="62">ke dashboard.</tspan>
   </text>
 
-  <text x="110" y="435" fill="white" fill-opacity="0.72" font-family="Arial, Helvetica, sans-serif" font-size="23">
-    <tspan x="110" dy="0">Pengguna baru bisa daftar lalu langsung masuk ke dashboard,</tspan>
-    <tspan x="110" dy="34">tanpa berpindah ke banyak halaman atau setup yang panjang.</tspan>
+  <text x="110" y="430" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="22">
+    <tspan x="110" dy="0">Alur daftar dibuat singkat supaya user baru bisa segera</tspan>
+    <tspan x="110" dy="34">mencatat transaksi tanpa pindah ke banyak halaman.</tspan>
   </text>
 
-  <rect x="110" y="530" width="564" height="112" rx="28" fill="black" fill-opacity="0.18" stroke="white" stroke-opacity="0.1"/>
-  <text x="140" y="566" fill="#FFB86A" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" letter-spacing="2">KEY BENEFITS</text>
-  <text x="140" y="604" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="18">Password hashing, session database, dan UI auth yang konsisten</text>
+  <rect x="110" y="530" width="176" height="110" rx="26" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <rect x="304" y="530" width="176" height="110" rx="26" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <rect x="498" y="530" width="176" height="110" rx="26" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="134" y="564" fill="#0F172A" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">1 halaman</text>
+  <text x="134" y="596" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="14">Login dan register</text>
+  <text x="134" y="617" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="14">dalam panel yang sama.</text>
+  <text x="328" y="564" fill="#0F172A" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Cepat</text>
+  <text x="328" y="596" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="14">Setelah daftar berhasil</text>
+  <text x="328" y="617" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="14">user langsung masuk.</text>
+  <text x="522" y="564" fill="#0F172A" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Konsisten</text>
+  <text x="522" y="596" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="14">Visual bersih untuk</text>
+  <text x="522" y="617" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="14">desktop dan mobile.</text>
 
-  <rect x="778" y="114" width="156" height="44" rx="16" fill="white" fill-opacity="0.06"/>
-  <rect x="950" y="114" width="156" height="44" rx="16" fill="white"/>
-  <text x="856" y="142" text-anchor="middle" fill="white" fill-opacity="0.7" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700">Login</text>
-  <text x="1028" y="142" text-anchor="middle" fill="#0F172A" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700">Register</text>
+  <rect x="774" y="116" width="256" height="48" rx="18" fill="#F8FAFC"/>
+  <rect x="900" y="122" width="124" height="36" rx="14" fill="white"/>
+  <text x="836" y="146" text-anchor="middle" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700">Login</text>
+  <text x="962" y="146" text-anchor="middle" fill="#0F172A" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700">Register</text>
 
-  <text x="786" y="220" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">Buat akun baru</text>
-  <text x="786" y="254" fill="white" fill-opacity="0.58" font-family="Arial, Helvetica, sans-serif" font-size="16">Setelah register berhasil, kamu akan langsung masuk ke dashboard.</text>
+  <text x="778" y="222" fill="#0F172A" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700">Buat akun baru</text>
+  <text x="778" y="256" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="15">Setelah register berhasil, kamu akan langsung masuk ke dashboard.</text>
 
-  <text x="786" y="308" fill="white" fill-opacity="0.72" font-family="Arial, Helvetica, sans-serif" font-size="14">Nama</text>
-  <rect x="786" y="322" width="312" height="52" rx="18" fill="white" fill-opacity="0.06" stroke="white" stroke-opacity="0.1"/>
-  <text x="810" y="354" fill="white" fill-opacity="0.36" font-family="Arial, Helvetica, sans-serif" font-size="15">Bayu</text>
+  <text x="778" y="308" fill="#475569" font-family="Arial, Helvetica, sans-serif" font-size="13">Nama</text>
+  <rect x="778" y="322" width="236" height="50" rx="16" fill="white" stroke="#E2E8F0"/>
+  <text x="800" y="353" fill="#94A3B8" font-family="Arial, Helvetica, sans-serif" font-size="14">Bayu</text>
 
-  <text x="786" y="402" fill="white" fill-opacity="0.72" font-family="Arial, Helvetica, sans-serif" font-size="14">Email</text>
-  <rect x="786" y="416" width="312" height="52" rx="18" fill="white" fill-opacity="0.06" stroke="white" stroke-opacity="0.1"/>
-  <text x="810" y="448" fill="white" fill-opacity="0.36" font-family="Arial, Helvetica, sans-serif" font-size="15">bayu@email.com</text>
+  <text x="778" y="394" fill="#475569" font-family="Arial, Helvetica, sans-serif" font-size="13">Email</text>
+  <rect x="778" y="408" width="236" height="50" rx="16" fill="white" stroke="#E2E8F0"/>
+  <text x="800" y="439" fill="#94A3B8" font-family="Arial, Helvetica, sans-serif" font-size="14">bayu@email.com</text>
 
-  <text x="786" y="496" fill="white" fill-opacity="0.72" font-family="Arial, Helvetica, sans-serif" font-size="14">Password</text>
-  <rect x="786" y="510" width="312" height="52" rx="18" fill="white" fill-opacity="0.06" stroke="white" stroke-opacity="0.1"/>
-  <text x="810" y="542" fill="white" fill-opacity="0.36" font-family="Arial, Helvetica, sans-serif" font-size="15">Minimal 8 karakter</text>
+  <text x="778" y="480" fill="#475569" font-family="Arial, Helvetica, sans-serif" font-size="13">Password</text>
+  <rect x="778" y="494" width="236" height="50" rx="16" fill="white" stroke="#E2E8F0"/>
+  <text x="800" y="525" fill="#94A3B8" font-family="Arial, Helvetica, sans-serif" font-size="14">Minimal 8 karakter</text>
 
-  <text x="786" y="590" fill="white" fill-opacity="0.72" font-family="Arial, Helvetica, sans-serif" font-size="14">Konfirmasi password</text>
-  <rect x="786" y="604" width="312" height="52" rx="18" fill="white" fill-opacity="0.06" stroke="white" stroke-opacity="0.1"/>
-  <text x="810" y="636" fill="white" fill-opacity="0.36" font-family="Arial, Helvetica, sans-serif" font-size="15">Ulangi password</text>
+  <text x="778" y="566" fill="#475569" font-family="Arial, Helvetica, sans-serif" font-size="13">Konfirmasi password</text>
+  <rect x="778" y="580" width="236" height="50" rx="16" fill="white" stroke="#E2E8F0"/>
+  <text x="800" y="611" fill="#94A3B8" font-family="Arial, Helvetica, sans-serif" font-size="14">Ulangi password</text>
+
+  <rect x="1094" y="202" width="62" height="16" rx="8" fill="#1F2D45"/>
+  <rect x="1094" y="238" width="62" height="308" rx="20" fill="white"/>
+  <rect x="1104" y="256" width="42" height="12" rx="6" fill="#F8FAFC"/>
+  <rect x="1104" y="280" width="42" height="22" rx="10" fill="#F8FAFC"/>
+  <rect x="1104" y="314" width="42" height="22" rx="10" fill="#F8FAFC"/>
+  <rect x="1104" y="348" width="42" height="22" rx="10" fill="#F8FAFC"/>
+  <rect x="1104" y="382" width="42" height="22" rx="10" fill="#F8FAFC"/>
+  <rect x="1104" y="424" width="42" height="20" rx="10" fill="#0F172A"/>
 </svg>

@@ -11,6 +11,13 @@
 </p>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/Next.js-16.2.1-0F172A?style=flat-square" alt="Next.js 16.2.1" />
+  <img src="https://img.shields.io/badge/React-19.2.4-0EA5E9?style=flat-square" alt="React 19.2.4" />
+  <img src="https://img.shields.io/badge/Prisma-7.6.0-1E293B?style=flat-square" alt="Prisma 7.6.0" />
+  <img src="https://img.shields.io/badge/PostgreSQL-Neon-10B981?style=flat-square" alt="PostgreSQL Neon" />
+</p>
+
+<p align="center">
   <a href="https://your-project-name.vercel.app"><strong>Live Demo</strong></a> ·
   <a href="#akses-halaman"><strong>Page Links</strong></a> ·
   <a href="#preview-tampilan"><strong>Preview</strong></a> ·
@@ -38,8 +45,9 @@ Link utama aplikasi:
 
 Project ini adalah aplikasi expense tracker full-stack dengan fokus pada alur yang cepat:
 pengguna bisa register atau login, membuat transaksi pemasukan dan pengeluaran, lalu
-langsung melihat total balance, total income, total expense, dan daftar transaksi yang
-bisa difilter berdasarkan kategori.
+langsung melihat total balance, total income, total expense, chart arus kas, insight
+otomatis, dan daftar transaksi yang bisa dicari serta difilter berdasarkan kategori
+dan tipe transaksi.
 
 Desain antarmuka memakai App Router dengan server-first data loading, sementara data
 disimpan di PostgreSQL melalui Prisma. Session login dikelola di server dengan cookie
@@ -52,8 +60,11 @@ sampai menengah.
 - Session berbasis database dengan cookie `httpOnly`.
 - Dashboard transaksi dalam satu halaman dengan ringkasan balance, income, dan expense.
 - Chart bulanan untuk membandingkan pemasukan, pengeluaran, dan balance.
+- Insight cepat seperti saving rate bulan ini, rata-rata transaksi, dan transaksi terbesar.
 - Form transaksi untuk pemasukan dan pengeluaran dengan kategori bawaan.
-- Filter kategori untuk memfokuskan daftar transaksi yang sedang dilihat.
+- Pencarian transaksi berdasarkan judul, kategori, dan catatan.
+- Filter kategori dan tipe transaksi untuk memfokuskan daftar yang sedang dilihat.
+- Ringkasan kategori pengeluaran dominan untuk membaca pola belanja lebih cepat.
 - Rendering data dari server menggunakan Next.js App Router dan Server Actions.
 
 ## Preview Tampilan
@@ -90,6 +101,12 @@ sampai menengah.
 - PostgreSQL
 - Tailwind CSS 4
 - TypeScript
+
+## Highlight UI
+
+- Dashboard dirancang mobile-first dengan grid yang tetap rapi saat dibuka di layar kecil.
+- Preview README memakai mockup desktop dan mobile agar perubahan UI lebih mudah dipahami.
+- Warna dan card layout dibuat ringan supaya data keuangan tetap jadi fokus utama.
 
 ## Menjalankan Secara Lokal
 
