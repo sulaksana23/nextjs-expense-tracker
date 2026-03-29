@@ -1,15 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f3f4f6;
-  --foreground: #111827;
-  --accent: #1f2937;
-  --accent-strong: #111827;
-  --accent-soft: #e5e7eb;
-  --muted-foreground: #6b7280;
-  --surface-soft: #f9fafb;
-  --surface-card: #ffffff;
-  --border-soft: #e5e7eb;
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --accent: #3b82f6;
+  --accent-strong: #2563eb;
+  --accent-soft: #dbeafe;
+  --muted-foreground: #94a3b8;
+  --surface-soft: #1e293b;
+  --surface-card: #1a2332;
+  --border-soft: #334155;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
   --font-app-sans: "Plus Jakarta Sans", "Segoe UI", "Trebuchet MS", sans-serif;
   --font-app-mono: "IBM Plex Mono", "SFMono-Regular", "Consolas", monospace;
 }
@@ -26,17 +29,25 @@
 }
 
 html {
-  background: var(--background);
+  background: linear-gradient(135deg, var(--background) 0%, #0d1117 100%);
+  background-attachment: fixed;
 }
 
 body {
-  background: var(--background);
+  background: transparent;
   color: var(--foreground);
   font-family: var(--font-app-sans);
+  line-height: 1.6;
 }
 
 a {
-  color: inherit;
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--accent-strong);
 }
 
 button,
@@ -47,6 +58,6 @@ textarea {
 }
 
 ::selection {
-  background: rgba(239, 108, 47, 0.18);
-  color: var(--foreground);
+  background: var(--accent);
+  color: white;
 }
