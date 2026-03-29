@@ -203,14 +203,14 @@ export default function TransactionsChart({
 
   if (chartData.labels.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center text-sm text-slate-500">
+      <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center text-sm text-slate-500">
         Chart akan muncul setelah ada transaksi di lebih dari satu waktu pencatatan.
       </div>
     );
   }
 
   return (
-    <div className="h-80 w-full">
+    <div className="h-64 w-full sm:h-72">
       <canvas ref={canvasRef} aria-label="Chart arus kas bulanan" role="img" />
     </div>
   );

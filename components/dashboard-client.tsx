@@ -218,7 +218,7 @@ function SubmitButton({ label }: { label: string }) {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex w-full items-center justify-center rounded-xl bg-[var(--accent-strong)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+      className="inline-flex w-full items-center justify-center rounded-xl bg-[var(--accent-strong)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
     >
       {pending ? "Menyimpan..." : label}
     </button>
@@ -489,10 +489,10 @@ export default function DashboardClient({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] px-3 py-3 text-slate-900 sm:px-4 sm:py-4 md:px-6 md:py-6">
-      <div className="mx-auto grid w-full max-w-6xl gap-3">
-        <header className="grid gap-4 rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="space-y-2.5">
+    <div className="min-h-screen bg-[var(--background)] px-2.5 py-2.5 text-slate-900 sm:px-3 sm:py-3 md:px-4 md:py-4">
+      <div className="mx-auto grid w-full max-w-6xl gap-2.5">
+        <header className="grid gap-3 rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3.5 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex w-fit rounded-full bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-700">
                 Dashboard Keuangan
@@ -501,11 +501,11 @@ export default function DashboardClient({
                 Private per akun
               </span>
             </div>
-            <div className="space-y-1.5">
-              <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            <div className="space-y-1">
+              <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
                 Halo, {userName}
               </h1>
-              <p className="max-w-2xl text-sm leading-6 text-slate-600">
+              <p className="max-w-2xl text-sm leading-5 text-slate-600">
                 Semua pemasukan dan pengeluaran yang tampil di dashboard ini hanya milik
                 akun yang sedang login.
               </p>
@@ -515,14 +515,14 @@ export default function DashboardClient({
           <form action={logoutAction} className="flex items-start justify-start lg:justify-end">
             <button
               type="submit"
-              className="w-full rounded-xl border border-slate-200 bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 sm:w-auto"
+              className="w-full rounded-xl border border-slate-200 bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 sm:w-auto"
             >
               Logout
             </button>
           </form>
         </header>
 
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
           {[
             {
               label: "Total Balance",
@@ -553,11 +553,11 @@ export default function DashboardClient({
           ].map((card) => (
             <article
               key={card.label}
-              className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-4"
+              className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3.5"
             >
-              <p className="text-sm text-slate-500">{card.label}</p>
+              <p className="text-xs uppercase tracking-[0.16em] text-slate-500">{card.label}</p>
               <h2
-                className={`pt-2 text-xl font-semibold tracking-tight sm:text-2xl ${card.tone}`}
+                className={`pt-1.5 text-lg font-semibold tracking-tight sm:text-xl ${card.tone}`}
               >
                 {card.value}
               </h2>
@@ -565,47 +565,47 @@ export default function DashboardClient({
           ))}
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-[0.92fr_1.08fr]">
-          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 sm:p-5">
-            <div className="space-y-2">
+        <section className="grid gap-3 lg:grid-cols-[0.92fr_1.08fr]">
+          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3.5 sm:p-4">
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between gap-3">
-                <h2 className="text-xl font-semibold text-slate-900">Tambah transaksi</h2>
+                <h2 className="text-lg font-semibold text-slate-900">Tambah transaksi</h2>
                 <span className="rounded-full border border-[var(--border-soft)] bg-[var(--surface-soft)] px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-slate-500">
                   Akun sendiri
                 </span>
               </div>
-              <p className="text-sm leading-6 text-slate-600">
+              <p className="text-sm leading-5 text-slate-600">
                 Gunakan form ini untuk menambah income atau expense ke akun kamu.
               </p>
             </div>
 
             {transactionState?.error ? (
-              <div className="mt-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                 {transactionState.error}
               </div>
             ) : null}
 
-            <form action={transactionAction} className="grid gap-4 pt-5">
-              <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4">
+            <form action={transactionAction} className="grid gap-3 pt-4">
+              <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3.5">
                 <div className="space-y-1">
                   <h3 className="text-sm font-semibold text-slate-900">
                     Import dari detail transaksi
                   </h3>
-                  <p className="text-sm leading-6 text-slate-500">
+                  <p className="text-sm leading-5 text-slate-500">
                     Tempel teks hasil copy atau OCR dari screenshot QRIS/banking seperti
                     rincian merchant, jumlah, dan waktu transaksi. Form akan otomatis
                     diarahkan ke pengeluaran.
                   </p>
                 </div>
 
-                <div className="grid gap-3 pt-4">
+                <div className="grid gap-2.5 pt-3">
                   <label className="grid gap-2 text-sm text-slate-600">
                     <span>Upload screenshot dari perangkat</span>
                     <input
                       type="file"
                       accept="image/*"
                       onChange={handleReceiptImageChange}
-                      className="block w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-700"
+                      className="block w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2.5 text-sm text-slate-900 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-700"
                     />
                     <p className="text-xs leading-5 text-slate-500">
                       Pilih gambar dari sistem, lalu app akan mencoba membaca teks
@@ -621,7 +621,7 @@ export default function DashboardClient({
                   <textarea
                     value={receiptImportText}
                     onChange={(event) => setReceiptImportText(event.target.value)}
-                    rows={6}
+                    rows={4}
                     placeholder={`Contoh:\nKe\nKFC TRAGIA NUSA DUA\nJumlah\nRp 22.000\nMetode Transaksi\nQRIS\nWaktu Transaksi\n29 Mar 2026, 12:22`}
                     className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
                   />
@@ -631,7 +631,7 @@ export default function DashboardClient({
                       type="button"
                       onClick={handleReceiptImport}
                       disabled={isProcessingReceiptImage}
-                      className="inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-300 sm:w-auto"
+                      className="inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:border-slate-300 disabled:opacity-60 sm:w-auto"
                     >
                       {isProcessingReceiptImage
                         ? "Memproses gambar..."
@@ -645,7 +645,7 @@ export default function DashboardClient({
                 </div>
               </div>
 
-              <div className="grid gap-2">
+              <div className="grid gap-1.5">
                 <span className="text-sm text-slate-600">Tipe transaksi</span>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {[
@@ -654,7 +654,7 @@ export default function DashboardClient({
                   ].map((option) => (
                     <label
                       key={option.value}
-                      className={`rounded-xl border px-4 py-3 text-center text-sm font-medium transition ${
+                      className={`rounded-xl border px-4 py-2.5 text-center text-sm font-medium transition ${
                         type === option.value
                           ? "border-slate-900 bg-slate-900 text-white"
                           : "border-[var(--border-soft)] bg-[var(--surface-soft)] text-slate-600 hover:border-slate-300"
@@ -684,20 +684,20 @@ export default function DashboardClient({
                 </div>
               </div>
 
-              <label className="grid gap-2 text-sm text-slate-600">
+              <label className="grid gap-1.5 text-sm text-slate-600">
                 <span>Judul transaksi</span>
                 <input
                   name="title"
                   value={titleInput}
                   onChange={(event) => setTitleInput(event.target.value)}
                   placeholder={type === "INCOME" ? "Gaji bulanan" : "Makan siang"}
-                  className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
+                  className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
                   required
                 />
               </label>
 
-              <div className="grid gap-4 xl:grid-cols-2">
-                <label className="grid gap-2 text-sm text-slate-600">
+              <div className="grid gap-3 xl:grid-cols-2">
+                <label className="grid gap-1.5 text-sm text-slate-600">
                   <span>Nominal</span>
                   <input name="amount" type="hidden" value={amountInput} />
                   <input
@@ -708,32 +708,32 @@ export default function DashboardClient({
                     onChange={(event) =>
                       setAmountInput(event.target.value.replace(/\D/g, ""))
                     }
-                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
+                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
                     required
                   />
                 </label>
 
-                <label className="grid gap-2 text-sm text-slate-600">
+                <label className="grid gap-1.5 text-sm text-slate-600">
                   <span>Tanggal</span>
                   <input
                     name="occurredAt"
                     type="date"
                     value={occurredAtInput}
                     onChange={(event) => setOccurredAtInput(event.target.value)}
-                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-slate-400"
+                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-400"
                     required
                   />
                 </label>
               </div>
 
-              <div className="grid gap-4 xl:grid-cols-2">
-                <label className="grid gap-2 text-sm text-slate-600">
+              <div className="grid gap-3 xl:grid-cols-2">
+                <label className="grid gap-1.5 text-sm text-slate-600">
                   <span>Kategori</span>
                   <select
                     name="category"
                     value={formCategory}
                     onChange={(event) => setFormCategory(event.target.value)}
-                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-slate-400"
+                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-400"
                   >
                     {formCategoryOptions.map((option) => (
                       <option key={option} value={option} className="text-slate-900">
@@ -743,14 +743,14 @@ export default function DashboardClient({
                   </select>
                 </label>
 
-                <label className="grid gap-2 text-sm text-slate-600">
+                <label className="grid gap-1.5 text-sm text-slate-600">
                   <span>Catatan</span>
                   <input
                     name="note"
                     value={noteInput}
                     onChange={(event) => setNoteInput(event.target.value)}
                     placeholder="Opsional"
-                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
+                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
                   />
                 </label>
               </div>
@@ -759,33 +759,33 @@ export default function DashboardClient({
             </form>
           </article>
 
-          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 sm:p-5">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3.5 sm:p-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0">
-                <h2 className="text-xl font-semibold">List transaksi</h2>
-                <p className="pt-2 text-sm leading-6 text-slate-500">
+                <h2 className="text-lg font-semibold">List transaksi</h2>
+                <p className="pt-1 text-sm leading-5 text-slate-500">
                   Hanya transaksi milik akun ini yang ditampilkan. Filter kategori
                   membantu review arus kas jadi lebih cepat.
                 </p>
               </div>
 
-              <div className="grid w-full gap-3 lg:w-auto lg:min-w-72">
-                <label className="grid gap-2 text-sm text-slate-500">
+              <div className="grid w-full gap-2.5 lg:w-auto lg:min-w-72">
+                <label className="grid gap-1.5 text-sm text-slate-500">
                   <span>Cari transaksi</span>
                   <input
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
                     placeholder="Cari judul, kategori, atau catatan"
-                    className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
+                    className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
                   />
                 </label>
 
-                <label className="grid gap-2 text-sm text-slate-500">
+                <label className="grid gap-1.5 text-sm text-slate-500">
                   <span>Filter kategori</span>
                   <select
                     value={selectedCategory}
                     onChange={(event) => setSelectedCategory(event.target.value)}
-                    className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-slate-400"
+                    className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-400"
                   >
                     {categories.map((category) => (
                       <option key={category} value={category}>
@@ -797,7 +797,7 @@ export default function DashboardClient({
               </div>
             </div>
 
-            <div className="mt-4 grid gap-3 rounded-xl bg-[var(--surface-soft)] p-3 sm:p-4">
+            <div className="mt-3 grid gap-2.5 rounded-xl bg-[var(--surface-soft)] p-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
                   Ringkasan filter
@@ -833,35 +833,35 @@ export default function DashboardClient({
                 ))}
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                <div className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3">
+              <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="rounded-xl border border-[var(--border-soft)] bg-white px-3.5 py-3">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
                     Income Filtered
                   </p>
-                  <p className="pt-2 text-lg font-semibold text-emerald-600">
+                  <p className="pt-1.5 text-base font-semibold text-emerald-600">
                     {formatCurrency(filteredTotals.income)}
                   </p>
                 </div>
-                <div className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3">
+                <div className="rounded-xl border border-[var(--border-soft)] bg-white px-3.5 py-3">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
                     Expense Filtered
                   </p>
-                  <p className="pt-2 text-lg font-semibold text-rose-600">
+                  <p className="pt-1.5 text-base font-semibold text-rose-600">
                     {formatCurrency(filteredTotals.expense)}
                   </p>
                 </div>
-                <div className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3">
+                <div className="rounded-xl border border-[var(--border-soft)] bg-white px-3.5 py-3">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
                     Balance Filtered
                   </p>
-                  <p className="pt-2 text-lg font-semibold text-slate-900">
+                  <p className="pt-1.5 text-base font-semibold text-slate-900">
                     {formatCurrency(filteredTotals.income - filteredTotals.expense)}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 grid gap-3">
+            <div className="mt-3 grid gap-2.5">
               {filteredTransactions.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center text-sm text-slate-500">
                   Belum ada transaksi untuk kategori ini.
@@ -870,11 +870,11 @@ export default function DashboardClient({
                 filteredTransactions.map((transaction) => (
                   <article
                     key={transaction.id}
-                    className="grid gap-4 rounded-xl border border-[var(--border-soft)] bg-white px-4 py-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-start"
-                  >
-                    <div className="min-w-0 space-y-2">
+                  className="grid gap-3 rounded-xl border border-[var(--border-soft)] bg-white px-3.5 py-3.5 md:grid-cols-[minmax(0,1fr)_auto] md:items-start"
+                >
+                    <div className="min-w-0 space-y-1.5">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="break-words text-lg font-semibold text-slate-900">
+                        <h3 className="break-words text-base font-semibold text-slate-900">
                           {transaction.title}
                         </h3>
                         <span
@@ -890,14 +890,14 @@ export default function DashboardClient({
                           {transaction.category}
                         </span>
                       </div>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 sm:text-sm">
                         <span>{formatDate(transaction.occurredAt)}</span>
                         {transaction.note ? <span>{transaction.note}</span> : null}
                       </div>
                     </div>
 
                     <div
-                      className={`text-left text-lg font-semibold tracking-tight sm:text-xl md:text-right ${
+                      className={`text-left text-base font-semibold tracking-tight sm:text-lg md:text-right ${
                         transaction.type === "INCOME"
                           ? "text-emerald-600"
                           : "text-rose-600"
@@ -913,11 +913,11 @@ export default function DashboardClient({
           </article>
         </section>
 
-        <section className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 sm:p-5">
+        <section className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3.5 sm:p-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-slate-900">Chart arus kas</h2>
-              <p className="pt-1 text-sm leading-6 text-slate-500">
+              <h2 className="text-lg font-semibold text-slate-900">Chart arus kas</h2>
+              <p className="pt-1 text-sm leading-5 text-slate-500">
                 Perbandingan pemasukan, pengeluaran, dan balance per bulan untuk 6
                 periode terbaru.
               </p>
@@ -927,44 +927,44 @@ export default function DashboardClient({
             </span>
           </div>
 
-          <div className="pt-5">
+          <div className="pt-3">
             <TransactionsChart transactions={transactions} />
           </div>
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 sm:p-5">
+        <section className="grid gap-3 lg:grid-cols-[0.9fr_1.1fr]">
+          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3.5 sm:p-4">
             <div className="space-y-1">
-              <h2 className="text-xl font-semibold text-slate-900">Insight cepat</h2>
-              <p className="text-sm leading-6 text-slate-500">
+              <h2 className="text-lg font-semibold text-slate-900">Insight cepat</h2>
+              <p className="text-sm leading-5 text-slate-500">
                 Ringkasan otomatis dari transaksi yang sedang tampil di dashboard.
               </p>
             </div>
 
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4">
+            <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
+              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3.5">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
                   Rata-rata transaksi
                 </p>
-                <p className="pt-2 text-lg font-semibold text-slate-900">
+                <p className="pt-1.5 text-base font-semibold text-slate-900">
                   {formatCurrency(highlightMetrics.averageAmount)}
                 </p>
               </article>
 
-              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4">
+              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3.5">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
                   Aktivitas 30 hari
                 </p>
-                <p className="pt-2 text-lg font-semibold text-slate-900">
+                <p className="pt-1.5 text-base font-semibold text-slate-900">
                   {highlightMetrics.recentTransactions} transaksi
                 </p>
               </article>
 
-              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4">
+              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3.5">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
                   Saving rate bulan ini
                 </p>
-                <p className="pt-2 text-lg font-semibold text-emerald-600">
+                <p className="pt-1.5 text-base font-semibold text-emerald-600">
                   {highlightMetrics.savingsRate}%
                 </p>
                 <p className="pt-1 text-sm text-slate-500">
@@ -972,11 +972,11 @@ export default function DashboardClient({
                 </p>
               </article>
 
-              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4">
+              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3.5">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
                   Transaksi terbesar
                 </p>
-                <p className="pt-2 text-lg font-semibold text-slate-900">
+                <p className="pt-1.5 text-base font-semibold text-slate-900">
                   {highlightMetrics.largestTransaction
                     ? formatCurrency(highlightMetrics.largestTransaction.amount)
                     : "Belum ada data"}
@@ -992,15 +992,15 @@ export default function DashboardClient({
             </div>
           </article>
 
-          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 sm:p-5">
+          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3.5 sm:p-4">
             <div className="space-y-1">
-              <h2 className="text-xl font-semibold text-slate-900">Kategori pengeluaran</h2>
-              <p className="text-sm leading-6 text-slate-500">
+              <h2 className="text-lg font-semibold text-slate-900">Kategori pengeluaran</h2>
+              <p className="text-sm leading-5 text-slate-500">
                 Kategori paling dominan dari transaksi yang sedang difilter.
               </p>
             </div>
 
-            <div className="mt-5 grid gap-3">
+            <div className="mt-3 grid gap-2.5">
               {expenseByCategory.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center text-sm text-slate-500">
                   Belum ada pengeluaran pada filter ini.
@@ -1016,7 +1016,7 @@ export default function DashboardClient({
                   return (
                     <div
                       key={item.category}
-                      className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4"
+                      className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3.5"
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
