@@ -47,7 +47,9 @@ Project ini adalah aplikasi expense tracker full-stack dengan fokus pada alur ya
 pengguna bisa register atau login, membuat transaksi pemasukan dan pengeluaran, lalu
 langsung melihat total balance, total income, total expense, chart arus kas, insight
 otomatis, dan daftar transaksi yang bisa dicari serta difilter berdasarkan kategori
-dan tipe transaksi.
+dan tipe transaksi. Dashboard juga mendukung upload screenshot transaksi dari perangkat,
+OCR langsung di browser, lalu auto-fill ke form pengeluaran untuk mempercepat input
+transaksi dari aplikasi banking atau QRIS.
 
 Desain antarmuka memakai App Router dengan server-first data loading, sementara data
 disimpan di PostgreSQL melalui Prisma. Session login dikelola di server dengan cookie
@@ -62,6 +64,8 @@ sampai menengah.
 - Chart bulanan untuk membandingkan pemasukan, pengeluaran, dan balance.
 - Insight cepat seperti saving rate bulan ini, rata-rata transaksi, dan transaksi terbesar.
 - Form transaksi untuk pemasukan dan pengeluaran dengan kategori bawaan.
+- Upload screenshot transaksi dari perangkat dengan OCR client-side untuk membaca detail pembayaran.
+- Auto-fill pengeluaran dari hasil OCR seperti merchant, nominal, tanggal, dan catatan transaksi.
 - Pencarian transaksi berdasarkan judul, kategori, dan catatan.
 - Filter kategori dan tipe transaksi untuk memfokuskan daftar yang sedang dilihat.
 - Ringkasan kategori pengeluaran dominan untuk membaca pola belanja lebih cepat.
@@ -110,6 +114,7 @@ sampai menengah.
 - Dashboard dirancang mobile-first dengan grid yang tetap rapi saat dibuka di layar kecil.
 - Preview README memakai mockup desktop dan mobile agar perubahan UI lebih mudah dipahami.
 - Warna dan card layout dibuat ringan supaya data keuangan tetap jadi fokus utama.
+- Import screenshot transaksi tetap berjalan di sisi client, jadi tidak butuh layanan OCR eksternal tambahan.
 
 ## Menjalankan Secara Lokal
 
@@ -218,6 +223,12 @@ npx prisma validate
 npx tsc --noEmit
 npm run lint
 ```
+
+## Catatan OCR
+
+- Fitur upload screenshot transaksi membaca gambar langsung di browser memakai `tesseract.js`.
+- Hasil paling akurat jika screenshot jelas, tidak blur, dan bagian merchant, jumlah, serta waktu transaksi terlihat penuh.
+- Jika OCR belum akurat, teks hasil bacaan masih bisa diedit sebelum diisi otomatis ke form pengeluaran.
 
 ## Roadmap Pengembangan
 
