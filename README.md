@@ -1,7 +1,9 @@
 # Expense Tracker
 
 <p align="center">
-  <img src="./public/readme-cover.svg" alt="Expense Tracker dashboard preview" width="100%" />
+  <a href="#preview-tampilan">
+    <img src="./public/readme-cover.svg" alt="Expense Tracker dashboard preview" width="100%" />
+  </a>
 </p>
 
 <p align="center">
@@ -10,6 +12,8 @@
 
 <p align="center">
   <a href="https://your-project-name.vercel.app"><strong>Live Demo</strong></a> ·
+  <a href="#akses-halaman"><strong>Page Links</strong></a> ·
+  <a href="#preview-tampilan"><strong>Preview</strong></a> ·
   <a href="#fitur-utama"><strong>Features</strong></a> ·
   <a href="#tech-stack"><strong>Tech Stack</strong></a> ·
   <a href="#menjalankan-secara-lokal"><strong>Local Setup</strong></a> ·
@@ -21,6 +25,14 @@
 Demo online dapat diakses di Vercel:
 
 `https://your-project-name.vercel.app`
+
+## Akses Halaman
+
+Link utama aplikasi:
+
+- Login: `https://your-project-name.vercel.app/`
+- Register: `https://your-project-name.vercel.app/` lalu pilih tab `Register`
+- Dashboard: `https://your-project-name.vercel.app/` setelah berhasil login
 
 ## Ringkasan
 
@@ -48,19 +60,25 @@ sampai menengah.
 ### Login
 
 <p>
-  <img src="./public/readme-login.svg" alt="Preview halaman login Expense Tracker" width="100%" />
+  <a href="https://your-project-name.vercel.app/">
+    <img src="./public/readme-login.svg" alt="Preview halaman login Expense Tracker" width="100%" />
+  </a>
 </p>
 
 ### Register
 
 <p>
-  <img src="./public/readme-register.svg" alt="Preview halaman register Expense Tracker" width="100%" />
+  <a href="https://your-project-name.vercel.app/">
+    <img src="./public/readme-register.svg" alt="Preview halaman register Expense Tracker" width="100%" />
+  </a>
 </p>
 
 ### Dashboard
 
 <p>
-  <img src="./public/readme-dashboard.svg" alt="Preview halaman dashboard Expense Tracker" width="100%" />
+  <a href="https://your-project-name.vercel.app/">
+    <img src="./public/readme-dashboard.svg" alt="Preview halaman dashboard Expense Tracker" width="100%" />
+  </a>
 </p>
 
 ## Tech Stack

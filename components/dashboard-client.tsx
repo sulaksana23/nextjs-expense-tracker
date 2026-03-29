@@ -60,7 +60,7 @@ function SubmitButton({ label }: { label: string }) {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex w-full items-center justify-center rounded-2xl bg-[var(--accent-strong)] px-4 py-3 text-sm font-semibold text-white transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+      className="inline-flex w-full items-center justify-center rounded-xl bg-[var(--accent-strong)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
     >
       {pending ? "Menyimpan..." : label}
     </button>
@@ -132,22 +132,29 @@ export default function DashboardClient({
   const balance = totals.income - totals.expense;
   const filterOptions =
     type === "INCOME" ? incomeCategories : expenseCategories;
+  const activeCategoryLabel =
+    deferredCategory === "Semua" ? "Semua kategori" : deferredCategory;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(251,146,60,0.18),_transparent_32%),radial-gradient(circle_at_bottom_right,_rgba(16,185,129,0.18),_transparent_30%),linear-gradient(180deg,_#fff9f2_0%,_#f6efe6_45%,_#edf3f7_100%)] px-4 py-4 text-slate-900 sm:px-5 sm:py-6 md:px-8 md:py-8">
-      <div className="mx-auto grid w-full max-w-7xl gap-4 sm:gap-6">
-        <header className="grid gap-4 rounded-[28px] border border-black/6 bg-white/84 p-5 shadow-[0_30px_100px_rgba(15,23,42,0.10)] backdrop-blur sm:rounded-[32px] sm:p-6 lg:grid-cols-[1.3fr_0.7fr] md:p-8">
-          <div className="space-y-3">
-            <span className="inline-flex w-fit rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-strong)]">
-              Dashboard Keuangan
-            </span>
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl md:text-4xl lg:text-5xl">
+    <div className="min-h-screen bg-[var(--background)] px-3 py-3 text-slate-900 sm:px-4 sm:py-4 md:px-6 md:py-6">
+      <div className="mx-auto grid w-full max-w-6xl gap-3">
+        <header className="grid gap-4 rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="space-y-2.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex w-fit rounded-full bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-700">
+                Dashboard Keuangan
+              </span>
+              <span className="inline-flex rounded-full border border-[var(--border-soft)] bg-white px-3 py-1 text-[11px] font-medium text-slate-600">
+                Private per akun
+              </span>
+            </div>
+            <div className="space-y-1.5">
+              <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
                 Halo, {userName}
               </h1>
-              <p className="max-w-2xl pt-3 text-sm leading-6 text-slate-600 sm:leading-7 md:text-base">
-                Catat pemasukan dan pengeluaran harian, lihat balance secara cepat,
-                lalu fokus ke kategori yang paling sering bikin budget bergeser.
+              <p className="max-w-2xl text-sm leading-6 text-slate-600">
+                Semua pemasukan dan pengeluaran yang tampil di dashboard ini hanya milik
+                akun yang sedang login.
               </p>
             </div>
           </div>
@@ -155,14 +162,14 @@ export default function DashboardClient({
           <form action={logoutAction} className="flex items-start justify-start lg:justify-end">
             <button
               type="submit"
-              className="w-full rounded-2xl border border-slate-200 bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 sm:w-auto"
+              className="w-full rounded-xl border border-slate-200 bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 sm:w-auto"
             >
               Logout
             </button>
           </form>
         </header>
 
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {[
             {
               label: "Total Balance",
@@ -193,11 +200,11 @@ export default function DashboardClient({
           ].map((card) => (
             <article
               key={card.label}
-              className="rounded-[24px] border border-black/5 bg-white/86 p-4 shadow-[0_20px_70px_rgba(15,23,42,0.08)] backdrop-blur sm:rounded-[28px] sm:p-5"
+              className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-4"
             >
               <p className="text-sm text-slate-500">{card.label}</p>
               <h2
-                className={`pt-3 text-xl font-semibold tracking-tight sm:pt-4 sm:text-2xl ${card.tone}`}
+                className={`pt-2 text-xl font-semibold tracking-tight sm:text-2xl ${card.tone}`}
               >
                 {card.value}
               </h2>
@@ -205,24 +212,29 @@ export default function DashboardClient({
           ))}
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <article className="rounded-[28px] border border-black/6 bg-[#101b2d] p-5 text-white shadow-[0_30px_90px_rgba(2,6,23,0.34)] sm:rounded-[32px] sm:p-6">
+        <section className="grid gap-4 lg:grid-cols-[0.92fr_1.08fr]">
+          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 sm:p-5">
             <div className="space-y-2">
-              <h2 className="text-xl font-semibold sm:text-2xl">Tambah transaksi</h2>
-              <p className="text-sm leading-6 text-white/65">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-xl font-semibold text-slate-900">Tambah transaksi</h2>
+                <span className="rounded-full border border-[var(--border-soft)] bg-[var(--surface-soft)] px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-slate-500">
+                  Akun sendiri
+                </span>
+              </div>
+              <p className="text-sm leading-6 text-slate-600">
                 Gunakan form ini untuk menambah income atau expense ke akun kamu.
               </p>
             </div>
 
             {transactionState?.error ? (
-              <div className="mt-5 rounded-2xl border border-rose-500/30 bg-rose-500/12 px-4 py-3 text-sm text-rose-100">
+              <div className="mt-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                 {transactionState.error}
               </div>
             ) : null}
 
-            <form action={transactionAction} className="grid gap-4 pt-6 sm:gap-5">
+            <form action={transactionAction} className="grid gap-4 pt-5">
               <div className="grid gap-2">
-                <span className="text-sm text-white/72">Tipe transaksi</span>
+                <span className="text-sm text-slate-600">Tipe transaksi</span>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {[
                     { label: "Pengeluaran", value: "EXPENSE" as const },
@@ -230,10 +242,10 @@ export default function DashboardClient({
                   ].map((option) => (
                     <label
                       key={option.value}
-                      className={`rounded-2xl border px-4 py-3 text-center text-sm font-medium transition ${
+                      className={`rounded-xl border px-4 py-3 text-center text-sm font-medium transition ${
                         type === option.value
-                          ? "border-[var(--accent)] bg-white text-slate-950"
-                          : "border-white/10 bg-white/6 text-white/72 hover:border-white/20"
+                          ? "border-slate-900 bg-slate-900 text-white"
+                          : "border-[var(--border-soft)] bg-[var(--surface-soft)] text-slate-600 hover:border-slate-300"
                       }`}
                     >
                       <input
@@ -250,18 +262,18 @@ export default function DashboardClient({
                 </div>
               </div>
 
-              <label className="grid gap-2 text-sm text-white/72">
+              <label className="grid gap-2 text-sm text-slate-600">
                 <span>Judul transaksi</span>
                 <input
                   name="title"
                   placeholder={type === "INCOME" ? "Gaji bulanan" : "Makan siang"}
-                  className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/30 focus:border-[var(--accent)]"
+                  className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
                   required
                 />
               </label>
 
               <div className="grid gap-4 xl:grid-cols-2">
-                <label className="grid gap-2 text-sm text-white/72">
+                <label className="grid gap-2 text-sm text-slate-600">
                   <span>Nominal</span>
                   <input
                     name="amount"
@@ -269,17 +281,17 @@ export default function DashboardClient({
                     min="0"
                     step="1000"
                     placeholder="50000"
-                    className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/30 focus:border-[var(--accent)]"
+                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
                     required
                   />
                 </label>
 
-                <label className="grid gap-2 text-sm text-white/72">
+                <label className="grid gap-2 text-sm text-slate-600">
                   <span>Tanggal</span>
                   <input
                     name="occurredAt"
                     type="date"
-                    className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm text-white outline-none focus:border-[var(--accent)]"
+                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-slate-400"
                     defaultValue={new Date().toISOString().slice(0, 10)}
                     required
                   />
@@ -287,11 +299,11 @@ export default function DashboardClient({
               </div>
 
               <div className="grid gap-4 xl:grid-cols-2">
-                <label className="grid gap-2 text-sm text-white/72">
+                <label className="grid gap-2 text-sm text-slate-600">
                   <span>Kategori</span>
                   <select
                     name="category"
-                    className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm text-white outline-none focus:border-[var(--accent)]"
+                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-slate-400"
                     defaultValue={filterOptions[0]}
                   >
                     {filterOptions.map((option) => (
@@ -302,12 +314,12 @@ export default function DashboardClient({
                   </select>
                 </label>
 
-                <label className="grid gap-2 text-sm text-white/72">
+                <label className="grid gap-2 text-sm text-slate-600">
                   <span>Catatan</span>
                   <input
                     name="note"
                     placeholder="Opsional"
-                    className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm text-white outline-none placeholder:text-white/30 focus:border-[var(--accent)]"
+                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
                   />
                 </label>
               </div>
@@ -316,12 +328,13 @@ export default function DashboardClient({
             </form>
           </article>
 
-          <article className="rounded-[28px] border border-black/6 bg-white/84 p-5 shadow-[0_24px_80px_rgba(15,23,42,0.09)] backdrop-blur sm:rounded-[32px] sm:p-6">
+          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 sm:p-5">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0">
-                <h2 className="text-xl font-semibold sm:text-2xl">List transaksi</h2>
+                <h2 className="text-xl font-semibold">List transaksi</h2>
                 <p className="pt-2 text-sm leading-6 text-slate-500">
-                  Filter kategori untuk fokus ke arus kas yang ingin kamu review.
+                  Hanya transaksi milik akun ini yang ditampilkan. Filter kategori
+                  membantu review arus kas jadi lebih cepat.
                 </p>
               </div>
 
@@ -330,7 +343,7 @@ export default function DashboardClient({
                 <select
                   value={selectedCategory}
                   onChange={(event) => setSelectedCategory(event.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-[var(--accent-strong)]"
+                  className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-slate-400"
                 >
                   {categories.map((category) => (
                     <option key={category} value={category}>
@@ -341,9 +354,18 @@ export default function DashboardClient({
               </label>
             </div>
 
-            <div className="mt-5 grid gap-3 rounded-[24px] bg-[var(--surface-soft)] p-3 sm:rounded-[28px] sm:p-4">
+            <div className="mt-4 grid gap-3 rounded-xl bg-[var(--surface-soft)] p-3 sm:p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+                  Ringkasan filter
+                </p>
+                <span className="rounded-full border border-[var(--border-soft)] bg-white px-3 py-1 text-xs text-slate-600">
+                  {activeCategoryLabel}
+                </span>
+              </div>
+
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                <div className="rounded-2xl bg-white px-4 py-3">
+                <div className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
                     Income Filtered
                   </p>
@@ -351,7 +373,7 @@ export default function DashboardClient({
                     {formatCurrency(filteredTotals.income)}
                   </p>
                 </div>
-                <div className="rounded-2xl bg-white px-4 py-3">
+                <div className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
                     Expense Filtered
                   </p>
@@ -359,7 +381,7 @@ export default function DashboardClient({
                     {formatCurrency(filteredTotals.expense)}
                   </p>
                 </div>
-                <div className="rounded-2xl bg-white px-4 py-3">
+                <div className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
                     Balance Filtered
                   </p>
@@ -370,16 +392,16 @@ export default function DashboardClient({
               </div>
             </div>
 
-            <div className="mt-5 grid gap-3">
+            <div className="mt-4 grid gap-3">
               {filteredTransactions.length === 0 ? (
-                <div className="rounded-[28px] border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center text-sm text-slate-500">
+                <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center text-sm text-slate-500">
                   Belum ada transaksi untuk kategori ini.
                 </div>
               ) : (
                 filteredTransactions.map((transaction) => (
                   <article
                     key={transaction.id}
-                    className="grid gap-4 rounded-[24px] border border-slate-200 bg-white px-4 py-4 sm:rounded-[28px] sm:px-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-start"
+                    className="grid gap-4 rounded-xl border border-[var(--border-soft)] bg-white px-4 py-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-start"
                   >
                     <div className="min-w-0 space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
@@ -399,10 +421,10 @@ export default function DashboardClient({
                           {transaction.category}
                         </span>
                       </div>
-                      <p className="break-words text-sm text-slate-500">
-                        {formatDate(transaction.occurredAt)}
-                        {transaction.note ? ` • ${transaction.note}` : ""}
-                      </p>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
+                        <span>{formatDate(transaction.occurredAt)}</span>
+                        {transaction.note ? <span>{transaction.note}</span> : null}
+                      </div>
                     </div>
 
                     <div
