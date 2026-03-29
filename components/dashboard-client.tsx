@@ -39,6 +39,20 @@ const expenseCategories = [
 ];
 
 const initialTransactionState: TransactionState = {};
+const monthMap = new Map([
+  ["jan", "01"],
+  ["feb", "02"],
+  ["mar", "03"],
+  ["apr", "04"],
+  ["mei", "05"],
+  ["jun", "06"],
+  ["jul", "07"],
+  ["agu", "08"],
+  ["sep", "09"],
+  ["okt", "10"],
+  ["nov", "11"],
+  ["des", "12"],
+]);
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("id-ID", {
@@ -75,6 +89,128 @@ function formatRupiahInput(value: string) {
   }).format(Number(value));
 }
 
+function guessExpenseCategory(title: string) {
+  const normalizedTitle = title.toLowerCase();
+
+  if (
+    normalizedTitle.includes("kfc") ||
+    normalizedTitle.includes("makan") ||
+    normalizedTitle.includes("resto") ||
+    normalizedTitle.includes("cafe") ||
+    normalizedTitle.includes("kopi")
+  ) {
+    return "Makan";
+  }
+
+  if (
+    normalizedTitle.includes("gojek") ||
+    normalizedTitle.includes("grab") ||
+    normalizedTitle.includes("transport") ||
+    normalizedTitle.includes("parkir")
+  ) {
+    return "Transport";
+  }
+
+  if (
+    normalizedTitle.includes("listrik") ||
+    normalizedTitle.includes("air") ||
+    normalizedTitle.includes("internet") ||
+    normalizedTitle.includes("tagihan")
+  ) {
+    return "Tagihan";
+  }
+
+  if (
+    normalizedTitle.includes("apotek") ||
+    normalizedTitle.includes("klinik") ||
+    normalizedTitle.includes("rumah sakit")
+  ) {
+    return "Kesehatan";
+  }
+
+  if (
+    normalizedTitle.includes("bioskop") ||
+    normalizedTitle.includes("game") ||
+    normalizedTitle.includes("netflix")
+  ) {
+    return "Hiburan";
+  }
+
+  if (
+    normalizedTitle.includes("belanja") ||
+    normalizedTitle.includes("mart") ||
+    normalizedTitle.includes("store") ||
+    normalizedTitle.includes("shop")
+  ) {
+    return "Belanja";
+  }
+
+  return "Lainnya";
+}
+
+function toIsoDateFromIndonesianDate(value: string) {
+  const match = value
+    .trim()
+    .toLowerCase()
+    .match(/(\d{1,2})\s+([a-z]{3})\s+(\d{4})/);
+
+  if (!match) {
+    return "";
+  }
+
+  const [, day, monthLabel, year] = match;
+  const month = monthMap.get(monthLabel);
+
+  if (!month) {
+    return "";
+  }
+
+  return `${year}-${month}-${day.padStart(2, "0")}`;
+}
+
+function parseReceiptImport(rawValue: string) {
+  const lines = rawValue
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const joined = lines.join("\n");
+  const merchant =
+    joined.match(/Ke\s*\n?(.+)/i)?.[1]?.trim() ||
+    joined.match(/merchant\s*[:\-]?\s*(.+)/i)?.[1]?.trim() ||
+    "";
+  const amountText =
+    joined.match(/Jumlah\s*\n?Rp\s*([\d.]+)/i)?.[1] ||
+    joined.match(/Rp\s*([\d.]+)/i)?.[1] ||
+    "";
+  const transactionDateText =
+    joined.match(/Waktu\s+Transaksi\s*\n?([^\n,]+(?:,\s*\d{2}:\d{2})?)/i)?.[1] || "";
+  const transactionMethod =
+    joined.match(/Metode\s+Transaksi\s*\n?([^\n]+)/i)?.[1]?.trim() || "";
+  const acquirer =
+    joined.match(/Nama\s+Acquirer\s*\n?([^\n]+)/i)?.[1]?.trim() || "";
+  const reference =
+    joined.match(/No\.\s*Referensi\s*\n?([^\n]+)/i)?.[1]?.trim() || "";
+
+  const amount = amountText.replace(/\D/g, "");
+  const occurredAt = toIsoDateFromIndonesianDate(transactionDateText);
+  const title = merchant || "Pengeluaran QRIS";
+  const noteParts = [transactionMethod, acquirer, reference && `Ref ${reference}`].filter(
+    Boolean,
+  );
+
+  if (!amount) {
+    return null;
+  }
+
+  return {
+    amount,
+    category: guessExpenseCategory(title),
+    note: noteParts.join(" • "),
+    occurredAt,
+    title,
+  };
+}
+
 function SubmitButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
 
@@ -95,16 +231,26 @@ export default function DashboardClient({
 }: DashboardClientProps) {
   const [type, setType] = useState<TransactionType>("EXPENSE");
   const [amountInput, setAmountInput] = useState("");
+  const [titleInput, setTitleInput] = useState("");
+  const [noteInput, setNoteInput] = useState("");
+  const [occurredAtInput, setOccurredAtInput] = useState(
+    new Date().toISOString().slice(0, 10),
+  );
+  const [formCategory, setFormCategory] = useState(expenseCategories[0]);
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [selectedTypeFilter, setSelectedTypeFilter] =
     useState<TransactionTypeFilter>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
+  const [receiptImportText, setReceiptImportText] = useState("");
+  const [receiptImportState, setReceiptImportState] = useState("");
   const deferredCategory = useDeferredValue(selectedCategory);
   const deferredSearchQuery = useDeferredValue(searchQuery.trim().toLowerCase());
   const [transactionState, transactionAction] = useActionState(
     createTransactionAction,
     initialTransactionState,
   );
+  const formCategoryOptions =
+    type === "INCOME" ? incomeCategories : expenseCategories;
 
   const categories = useMemo(() => {
     const source = new Set<string>(["Semua"]);
@@ -179,8 +325,6 @@ export default function DashboardClient({
   }, [filteredTransactions]);
 
   const balance = totals.income - totals.expense;
-  const filterOptions =
-    type === "INCOME" ? incomeCategories : expenseCategories;
   const activeCategoryLabel =
     deferredCategory === "Semua" ? "Semua kategori" : deferredCategory;
   const activeTypeLabel =
@@ -275,6 +419,27 @@ export default function DashboardClient({
       savingsRate,
     };
   }, [filteredTransactions]);
+
+  function handleReceiptImport() {
+    const parsedReceipt = parseReceiptImport(receiptImportText);
+
+    if (!parsedReceipt) {
+      setReceiptImportState(
+        "Detail belum terbaca. Tempel teks hasil copy atau OCR yang memuat merchant, jumlah, dan waktu transaksi.",
+      );
+      return;
+    }
+
+    setType("EXPENSE");
+    setTitleInput(parsedReceipt.title);
+    setAmountInput(parsedReceipt.amount);
+    setNoteInput(parsedReceipt.note);
+    setOccurredAtInput(parsedReceipt.occurredAt || new Date().toISOString().slice(0, 10));
+    setFormCategory(parsedReceipt.category);
+    setReceiptImportState(
+      "Detail transaksi berhasil dibaca dan sudah diisi ke form pengeluaran.",
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[var(--background)] px-3 py-3 text-slate-900 sm:px-4 sm:py-4 md:px-6 md:py-6">
@@ -374,6 +539,43 @@ export default function DashboardClient({
             ) : null}
 
             <form action={transactionAction} className="grid gap-4 pt-5">
+              <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-4">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-semibold text-slate-900">
+                    Import dari detail transaksi
+                  </h3>
+                  <p className="text-sm leading-6 text-slate-500">
+                    Tempel teks hasil copy atau OCR dari screenshot QRIS/banking seperti
+                    rincian merchant, jumlah, dan waktu transaksi. Form akan otomatis
+                    diarahkan ke pengeluaran.
+                  </p>
+                </div>
+
+                <div className="grid gap-3 pt-4">
+                  <textarea
+                    value={receiptImportText}
+                    onChange={(event) => setReceiptImportText(event.target.value)}
+                    rows={6}
+                    placeholder={`Contoh:\nKe\nKFC TRAGIA NUSA DUA\nJumlah\nRp 22.000\nMetode Transaksi\nQRIS\nWaktu Transaksi\n29 Mar 2026, 12:22`}
+                    className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
+                  />
+
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <button
+                      type="button"
+                      onClick={handleReceiptImport}
+                      className="inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-300 sm:w-auto"
+                    >
+                      Isi otomatis ke pengeluaran
+                    </button>
+
+                    {receiptImportState ? (
+                      <p className="text-sm text-slate-500">{receiptImportState}</p>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+
               <div className="grid gap-2">
                 <span className="text-sm text-slate-600">Tipe transaksi</span>
                 <div className="grid gap-2 sm:grid-cols-2">
@@ -394,7 +596,17 @@ export default function DashboardClient({
                         name="type"
                         value={option.value}
                         checked={type === option.value}
-                        onChange={() => setType(option.value)}
+                        onChange={() => {
+                          setType(option.value);
+                          const nextCategoryOptions =
+                            option.value === "INCOME"
+                              ? incomeCategories
+                              : expenseCategories;
+
+                          if (!nextCategoryOptions.includes(formCategory)) {
+                            setFormCategory(nextCategoryOptions[0]);
+                          }
+                        }}
                         className="sr-only"
                       />
                       {option.label}
@@ -407,6 +619,8 @@ export default function DashboardClient({
                 <span>Judul transaksi</span>
                 <input
                   name="title"
+                  value={titleInput}
+                  onChange={(event) => setTitleInput(event.target.value)}
                   placeholder={type === "INCOME" ? "Gaji bulanan" : "Makan siang"}
                   className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
                   required
@@ -435,8 +649,9 @@ export default function DashboardClient({
                   <input
                     name="occurredAt"
                     type="date"
+                    value={occurredAtInput}
+                    onChange={(event) => setOccurredAtInput(event.target.value)}
                     className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-slate-400"
-                    defaultValue={new Date().toISOString().slice(0, 10)}
                     required
                   />
                 </label>
@@ -447,10 +662,11 @@ export default function DashboardClient({
                   <span>Kategori</span>
                   <select
                     name="category"
+                    value={formCategory}
+                    onChange={(event) => setFormCategory(event.target.value)}
                     className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-slate-400"
-                    defaultValue={filterOptions[0]}
                   >
-                    {filterOptions.map((option) => (
+                    {formCategoryOptions.map((option) => (
                       <option key={option} value={option} className="text-slate-900">
                         {option}
                       </option>
@@ -462,6 +678,8 @@ export default function DashboardClient({
                   <span>Catatan</span>
                   <input
                     name="note"
+                    value={noteInput}
+                    onChange={(event) => setNoteInput(event.target.value)}
                     placeholder="Opsional"
                     className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
                   />
