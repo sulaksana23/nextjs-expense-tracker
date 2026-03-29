@@ -243,6 +243,8 @@ export default function DashboardClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [receiptImportText, setReceiptImportText] = useState("");
   const [receiptImportState, setReceiptImportState] = useState("");
+  const [receiptImageName, setReceiptImageName] = useState("");
+  const [isProcessingReceiptImage, setIsProcessingReceiptImage] = useState(false);
   const deferredCategory = useDeferredValue(selectedCategory);
   const deferredSearchQuery = useDeferredValue(searchQuery.trim().toLowerCase());
   const [transactionState, transactionAction] = useActionState(
@@ -441,6 +443,51 @@ export default function DashboardClient({
     );
   }
 
+  async function handleReceiptImageChange(
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    setReceiptImageName(file.name);
+    setIsProcessingReceiptImage(true);
+    setReceiptImportState("Membaca gambar transaksi dari file yang dipilih...");
+
+    try {
+      const { createWorker } = await import("tesseract.js");
+      const worker = await createWorker("eng", 1, {
+        logger(message) {
+          if (message.status === "recognizing text") {
+            setReceiptImportState(
+              `OCR berjalan ${Math.round(message.progress * 100)}%...`,
+            );
+          }
+        },
+      });
+
+      const {
+        data: { text },
+      } = await worker.recognize(file);
+
+      await worker.terminate();
+
+      setReceiptImportText(text);
+      setReceiptImportState(
+        "Teks dari gambar berhasil dibaca. Klik tombol isi otomatis untuk memasukkan ke pengeluaran.",
+      );
+    } catch {
+      setReceiptImportState(
+        "Gambar belum bisa dibaca otomatis. Coba gunakan screenshot yang lebih jelas atau tempel teks OCR secara manual.",
+      );
+    } finally {
+      setIsProcessingReceiptImage(false);
+      event.target.value = "";
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[var(--background)] px-3 py-3 text-slate-900 sm:px-4 sm:py-4 md:px-6 md:py-6">
       <div className="mx-auto grid w-full max-w-6xl gap-3">
@@ -552,6 +599,25 @@ export default function DashboardClient({
                 </div>
 
                 <div className="grid gap-3 pt-4">
+                  <label className="grid gap-2 text-sm text-slate-600">
+                    <span>Upload screenshot dari perangkat</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleReceiptImageChange}
+                      className="block w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 file:mr-4 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-700"
+                    />
+                    <p className="text-xs leading-5 text-slate-500">
+                      Pilih gambar dari sistem, lalu app akan mencoba membaca teks
+                      merchant, nominal, dan waktu transaksi otomatis.
+                    </p>
+                    {receiptImageName ? (
+                      <p className="text-xs font-medium text-slate-600">
+                        File dipilih: {receiptImageName}
+                      </p>
+                    ) : null}
+                  </label>
+
                   <textarea
                     value={receiptImportText}
                     onChange={(event) => setReceiptImportText(event.target.value)}
@@ -564,9 +630,12 @@ export default function DashboardClient({
                     <button
                       type="button"
                       onClick={handleReceiptImport}
+                      disabled={isProcessingReceiptImage}
                       className="inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-300 sm:w-auto"
                     >
-                      Isi otomatis ke pengeluaran
+                      {isProcessingReceiptImage
+                        ? "Memproses gambar..."
+                        : "Isi otomatis ke pengeluaran"}
                     </button>
 
                     {receiptImportState ? (
