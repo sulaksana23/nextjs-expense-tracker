@@ -1,10 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { TransactionType } from "@/app/generated/prisma/enums";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { logRuntimeError } from "@/lib/runtime-error";
 
 export type TransactionState = {
   error?: string;
@@ -19,46 +20,56 @@ export async function createTransactionAction(
   _prevState: TransactionState | undefined,
   formData: FormData,
 ): Promise<TransactionState> {
-  const user = await requireUser();
-  const title = readText(formData, "title");
-  const category = readText(formData, "category");
-  const note = readText(formData, "note");
-  const occurredAt = readText(formData, "occurredAt");
-  const type = readText(formData, "type");
-  const amount = Number(readText(formData, "amount"));
+  try {
+    const user = await requireUser();
+    const title = readText(formData, "title");
+    const category = readText(formData, "category");
+    const note = readText(formData, "note");
+    const occurredAt = readText(formData, "occurredAt");
+    const type = readText(formData, "type");
+    const amount = Number(readText(formData, "amount"));
 
-  if (!title) {
-    return { error: "Judul transaksi wajib diisi." };
+    if (!title) {
+      return { error: "Judul transaksi wajib diisi." };
+    }
+
+    if (!category) {
+      return { error: "Kategori wajib dipilih." };
+    }
+
+    if (!occurredAt) {
+      return { error: "Tanggal transaksi wajib diisi." };
+    }
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return { error: "Nominal harus lebih besar dari 0." };
+    }
+
+    if (type !== TransactionType.INCOME && type !== TransactionType.EXPENSE) {
+      return { error: "Tipe transaksi tidak valid." };
+    }
+
+    await prisma.transaction.create({
+      data: {
+        title,
+        category,
+        note: note || null,
+        amount,
+        type,
+        occurredAt: new Date(occurredAt),
+        userId: user.id,
+      },
+    });
+
+    revalidatePath("/");
+    redirect("/");
+  } catch (error) {
+    unstable_rethrow(error);
+    logRuntimeError({ area: "create-transaction-action" }, error);
+
+    return {
+      error:
+        "Transaksi belum bisa disimpan. Periksa koneksi database atau migration production di Vercel.",
+    };
   }
-
-  if (!category) {
-    return { error: "Kategori wajib dipilih." };
-  }
-
-  if (!occurredAt) {
-    return { error: "Tanggal transaksi wajib diisi." };
-  }
-
-  if (!Number.isFinite(amount) || amount <= 0) {
-    return { error: "Nominal harus lebih besar dari 0." };
-  }
-
-  if (type !== TransactionType.INCOME && type !== TransactionType.EXPENSE) {
-    return { error: "Tipe transaksi tidak valid." };
-  }
-
-  await prisma.transaction.create({
-    data: {
-      title,
-      category,
-      note: note || null,
-      amount,
-      type,
-      occurredAt: new Date(occurredAt),
-      userId: user.id,
-    },
-  });
-
-  revalidatePath("/");
-  redirect("/");
 }

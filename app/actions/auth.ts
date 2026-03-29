@@ -1,8 +1,9 @@
 "use server";
 
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { clearSession, createSession, hashPassword, verifyPassword } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { logRuntimeError } from "@/lib/runtime-error";
 
 export type AuthState = {
   error?: string;
@@ -17,80 +18,99 @@ export async function registerAction(
   _prevState: AuthState | undefined,
   formData: FormData,
 ): Promise<AuthState> {
-  const name = readText(formData, "name");
-  const email = readText(formData, "email").toLowerCase();
-  const password = readText(formData, "password");
-  const confirmPassword = readText(formData, "confirmPassword");
+  try {
+    const name = readText(formData, "name");
+    const email = readText(formData, "email").toLowerCase();
+    const password = readText(formData, "password");
+    const confirmPassword = readText(formData, "confirmPassword");
 
-  if (name.length < 2) {
-    return { error: "Nama minimal 2 karakter." };
+    if (name.length < 2) {
+      return { error: "Nama minimal 2 karakter." };
+    }
+
+    if (!email.includes("@")) {
+      return { error: "Email belum valid." };
+    }
+
+    if (password.length < 8) {
+      return { error: "Password minimal 8 karakter." };
+    }
+
+    if (password !== confirmPassword) {
+      return { error: "Konfirmasi password tidak sama." };
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (existingUser) {
+      return { error: "Email ini sudah terdaftar." };
+    }
+
+    const passwordHash = await hashPassword(password);
+
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        passwordHash,
+      },
+    });
+
+    await createSession(user.id);
+    redirect("/");
+  } catch (error) {
+    unstable_rethrow(error);
+    logRuntimeError({ area: "register-action" }, error);
+
+    return {
+      error:
+        "Register belum bisa diproses. Periksa koneksi database atau migration production di Vercel.",
+    };
   }
-
-  if (!email.includes("@")) {
-    return { error: "Email belum valid." };
-  }
-
-  if (password.length < 8) {
-    return { error: "Password minimal 8 karakter." };
-  }
-
-  if (password !== confirmPassword) {
-    return { error: "Konfirmasi password tidak sama." };
-  }
-
-  const existingUser = await prisma.user.findUnique({
-    where: {
-      email,
-    },
-  });
-
-  if (existingUser) {
-    return { error: "Email ini sudah terdaftar." };
-  }
-
-  const passwordHash = await hashPassword(password);
-
-  const user = await prisma.user.create({
-    data: {
-      name,
-      email,
-      passwordHash,
-    },
-  });
-
-  await createSession(user.id);
-  redirect("/");
 }
 
 export async function loginAction(
   _prevState: AuthState | undefined,
   formData: FormData,
 ): Promise<AuthState> {
-  const email = readText(formData, "email").toLowerCase();
-  const password = readText(formData, "password");
+  try {
+    const email = readText(formData, "email").toLowerCase();
+    const password = readText(formData, "password");
 
-  if (!email || !password) {
-    return { error: "Email dan password wajib diisi." };
+    if (!email || !password) {
+      return { error: "Email dan password wajib diisi." };
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      return { error: "Akun tidak ditemukan." };
+    }
+
+    const validPassword = await verifyPassword(password, user.passwordHash);
+
+    if (!validPassword) {
+      return { error: "Password salah." };
+    }
+
+    await createSession(user.id);
+    redirect("/");
+  } catch (error) {
+    unstable_rethrow(error);
+    logRuntimeError({ area: "login-action" }, error);
+
+    return {
+      error: "Login belum bisa diproses. Periksa koneksi database di Vercel.",
+    };
   }
-
-  const user = await prisma.user.findUnique({
-    where: {
-      email,
-    },
-  });
-
-  if (!user) {
-    return { error: "Akun tidak ditemukan." };
-  }
-
-  const validPassword = await verifyPassword(password, user.passwordHash);
-
-  if (!validPassword) {
-    return { error: "Password salah." };
-  }
-
-  await createSession(user.id);
-  redirect("/");
 }
 
 export async function logoutAction() {
