@@ -88,6 +88,12 @@ Buat atau sesuaikan file `.env`:
 DATABASE_URL="postgresql://postgres:password@localhost:5433/expense_tracker?schema=public"
 ```
 
+Atau salin dari template:
+
+```bash
+cp .env.example .env
+```
+
 ### 3. Siapkan database
 
 Jika database masih kosong, jalankan:
@@ -115,6 +121,35 @@ Buka `http://localhost:3000` di browser.
 
 Project ini memakai generator `prisma-client` di Prisma 7, jadi koneksi database tidak
 didefinisikan di `schema.prisma`. URL database dibaca dari [`prisma.config.ts`](./prisma.config.ts), dan Prisma client diinisialisasi memakai adapter PostgreSQL di [`lib/prisma.ts`](./lib/prisma.ts).
+
+Urutan pembacaan env di project ini:
+
+- Runtime aplikasi: `POSTGRES_PRISMA_URL` → `POSTGRES_URL` → `DATABASE_URL`
+- Prisma CLI dan migrations: `POSTGRES_URL_NON_POOLING` → `DATABASE_URL_UNPOOLED` → fallback ke runtime URL
+
+Konfigurasi ini cocok untuk deployment ke Vercel Postgres yang ditenagai Neon, karena
+runtime bisa memakai koneksi pooled sementara Prisma CLI tetap bisa memakai direct
+connection jika environment variable non-pooling tersedia.
+
+## Deploy ke Vercel
+
+1. Push repository ke GitHub.
+2. Import project ke Vercel.
+3. Tambahkan integration Vercel Postgres atau Neon Postgres.
+4. Pastikan environment variable berikut tersedia di Vercel:
+
+```env
+POSTGRES_PRISMA_URL=postgres://...
+POSTGRES_URL_NON_POOLING=postgres://...
+```
+
+5. Redeploy project.
+
+Catatan:
+
+- Jangan gunakan `localhost` untuk deployment Vercel.
+- Script `postinstall` di project ini akan menjalankan `prisma generate` otomatis saat install dependency di build environment.
+- Jika schema database perlu diterapkan ke production, jalankan `prisma migrate deploy` pada environment yang memakai direct URL.
 
 ## Struktur Proyek
 

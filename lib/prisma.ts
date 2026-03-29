@@ -1,5 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/app/generated/prisma/client";
+import { getRuntimeDatabaseUrl } from "@/lib/database-url";
 import { Pool } from "pg";
 
 const globalForPrisma = globalThis as typeof globalThis & {
@@ -7,10 +8,12 @@ const globalForPrisma = globalThis as typeof globalThis & {
   prismaPool?: Pool;
 };
 
-const connectionString = process.env.DATABASE_URL;
+const connectionString = getRuntimeDatabaseUrl();
 
 if (!connectionString) {
-  throw new Error("DATABASE_URL is not set.");
+  throw new Error(
+    "Database URL is not set. Expected one of POSTGRES_PRISMA_URL, POSTGRES_URL, or DATABASE_URL.",
+  );
 }
 
 const pool =

@@ -53,25 +53,25 @@ export default function AuthPanel() {
   const state = mode === "login" ? loginState : registerState;
 
   return (
-    <div className="grid min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(255,174,92,0.24),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(37,99,235,0.24),_transparent_28%),linear-gradient(135deg,_#07111f_0%,_#10213a_55%,_#18273d_100%)] px-4 py-10 text-white md:px-8">
-      <div className="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-[1.08fr_0.92fr]">
-        <section className="flex flex-col justify-between rounded-[32px] border border-white/10 bg-white/7 p-7 shadow-[0_35px_120px_rgba(2,6,23,0.45)] backdrop-blur md:p-10">
-          <div className="space-y-6">
+    <div className="grid min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(255,174,92,0.24),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(37,99,235,0.24),_transparent_28%),linear-gradient(135deg,_#07111f_0%,_#10213a_55%,_#18273d_100%)] px-4 py-4 text-white sm:px-5 sm:py-6 md:px-8 md:py-8">
+      <div className="mx-auto grid w-full max-w-6xl gap-4 sm:gap-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-stretch">
+        <section className="order-2 flex flex-col justify-between rounded-[28px] border border-white/10 bg-white/7 p-5 shadow-[0_35px_120px_rgba(2,6,23,0.45)] backdrop-blur sm:rounded-[32px] sm:p-7 md:p-10 lg:order-1">
+          <div className="space-y-5 sm:space-y-6">
             <span className="inline-flex w-fit rounded-full border border-white/14 bg-white/8 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-[var(--accent)]">
               Expense Tracker
             </span>
-            <div className="space-y-4">
-              <h1 className="max-w-2xl text-4xl font-semibold tracking-tight md:text-6xl">
+            <div className="space-y-3 sm:space-y-4">
+              <h1 className="max-w-2xl text-2xl font-semibold tracking-tight sm:text-4xl md:text-5xl xl:text-6xl">
                 Catat uang masuk dan keluar tanpa setup yang ribet.
               </h1>
-              <p className="max-w-xl text-base leading-8 text-white/72 md:text-lg">
+              <p className="max-w-xl text-sm leading-6 text-white/72 sm:text-base sm:leading-7 md:text-lg">
                 Register sekali, lalu langsung pakai dashboard transaksi, total balance,
                 total income, total expense, dan filter kategori dalam satu halaman.
               </p>
             </div>
           </div>
 
-          <div className="grid gap-4 pt-8 sm:grid-cols-3">
+          <div className="hidden gap-3 pt-6 sm:grid sm:grid-cols-2 sm:gap-4 sm:pt-8 xl:grid-cols-3">
             {[
               ["Realtime", "Ringkasan balance langsung berubah setelah transaksi ditambah."],
               ["Aman", "Password di-hash dan sesi login disimpan di cookie httpOnly."],
@@ -82,18 +82,19 @@ export default function AuthPanel() {
                 className="rounded-3xl border border-white/10 bg-black/18 p-4"
               >
                 <h2 className="text-sm font-semibold text-white">{title}</h2>
-                <p className="pt-2 text-sm leading-6 text-white/64">{description}</p>
+                <p className="pt-2 text-sm leading-5 text-white/64 sm:leading-6">{description}</p>
               </article>
             ))}
           </div>
         </section>
 
-        <section className="rounded-[32px] border border-white/12 bg-[#0d1728]/92 p-6 shadow-[0_30px_80px_rgba(0,0,0,0.38)] backdrop-blur md:p-8">
+        <section className="order-1 w-full rounded-[28px] border border-white/12 bg-[#0d1728]/92 p-5 shadow-[0_30px_80px_rgba(0,0,0,0.38)] backdrop-blur sm:rounded-[32px] sm:p-6 md:p-8 lg:order-2 lg:self-center">
           <div className="grid grid-cols-2 gap-2 rounded-2xl bg-white/6 p-1">
             <button
               type="button"
               onClick={() => setMode("login")}
-              className={`rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+              aria-pressed={mode === "login"}
+              className={`rounded-2xl px-3 py-3 text-sm font-semibold transition sm:px-4 ${
                 mode === "login"
                   ? "bg-white text-slate-950"
                   : "text-white/70 hover:bg-white/7 hover:text-white"
@@ -104,6 +105,7 @@ export default function AuthPanel() {
             <button
               type="button"
               onClick={() => setMode("register")}
+              aria-pressed={mode === "register"}
               className={`rounded-2xl px-4 py-3 text-sm font-semibold transition ${
                 mode === "register"
                   ? "bg-white text-slate-950"
@@ -114,9 +116,9 @@ export default function AuthPanel() {
             </button>
           </div>
 
-          <div className="space-y-6 pt-6">
+          <div className="space-y-5 pt-5 sm:space-y-6 sm:pt-6">
             <div>
-              <h2 className="text-2xl font-semibold">
+              <h2 className="text-xl font-semibold sm:text-2xl">
                 {mode === "login" ? "Masuk ke akun kamu" : "Buat akun baru"}
               </h2>
               <p className="pt-2 text-sm leading-6 text-white/58">
@@ -133,7 +135,7 @@ export default function AuthPanel() {
             ) : null}
 
             {mode === "login" ? (
-              <form action={loginFormAction} className="grid gap-4">
+              <form key="login-form" action={loginFormAction} className="grid gap-4">
                 <Field label="Email" name="email" type="email" placeholder="bayu@email.com" />
                 <Field
                   label="Password"
@@ -144,7 +146,7 @@ export default function AuthPanel() {
                 <AuthSubmitButton label="Login" />
               </form>
             ) : (
-              <form action={registerFormAction} className="grid gap-4">
+              <form key="register-form" action={registerFormAction} className="grid gap-4">
                 <Field label="Nama" name="name" placeholder="Bayu" />
                 <Field label="Email" name="email" type="email" placeholder="bayu@email.com" />
                 <Field
