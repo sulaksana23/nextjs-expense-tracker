@@ -1,6 +1,6 @@
-<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="1200" height="820" viewBox="0 0 1200 820" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bg" x1="89" y1="41" x2="1114" y2="706" gradientUnits="userSpaceOnUse">
+    <linearGradient id="bg" x1="89" y1="41" x2="1114" y2="766" gradientUnits="userSpaceOnUse">
       <stop stop-color="#FFF9F2"/>
       <stop offset="0.48" stop-color="#F6EFE6"/>
       <stop offset="1" stop-color="#EDF3F7"/>
@@ -9,14 +9,15 @@
       <stop stop-color="#FB923C" stop-opacity="0.24"/>
       <stop offset="1" stop-color="#FB923C" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="g2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1024 648) rotate(-145.8) scale(379.812 248.884)">
+    <radialGradient id="g2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1024 708) rotate(-145.8) scale(379.812 248.884)">
       <stop stop-color="#10B981" stop-opacity="0.22"/>
       <stop offset="1" stop-color="#10B981" stop-opacity="0"/>
     </radialGradient>
   </defs>
-  <rect width="1200" height="760" rx="32" fill="url(#bg)"/>
-  <rect width="1200" height="760" rx="32" fill="url(#g1)"/>
-  <rect width="1200" height="760" rx="32" fill="url(#g2)"/>
+
+  <rect width="1200" height="820" rx="32" fill="url(#bg)"/>
+  <rect width="1200" height="820" rx="32" fill="url(#g1)"/>
+  <rect width="1200" height="820" rx="32" fill="url(#g2)"/>
 
   <rect x="64" y="66" width="1072" height="138" rx="34" fill="white" fill-opacity="0.84" stroke="black" stroke-opacity="0.06"/>
   <rect x="64" y="224" width="248" height="114" rx="28" fill="white" fill-opacity="0.86" stroke="black" stroke-opacity="0.05"/>
@@ -24,13 +25,14 @@
   <rect x="592" y="224" width="248" height="114" rx="28" fill="white" fill-opacity="0.86" stroke="black" stroke-opacity="0.05"/>
   <rect x="856" y="224" width="280" height="114" rx="28" fill="white" fill-opacity="0.86" stroke="black" stroke-opacity="0.05"/>
 
-  <rect x="64" y="362" width="444" height="328" rx="32" fill="#101B2D"/>
-  <rect x="532" y="362" width="604" height="328" rx="32" fill="white" fill-opacity="0.84" stroke="black" stroke-opacity="0.06"/>
+  <rect x="64" y="362" width="444" height="258" rx="32" fill="#101B2D"/>
+  <rect x="532" y="362" width="604" height="258" rx="32" fill="white" fill-opacity="0.84" stroke="black" stroke-opacity="0.06"/>
+  <rect x="64" y="644" width="1072" height="126" rx="32" fill="white" fill-opacity="0.84" stroke="black" stroke-opacity="0.06"/>
 
   <rect x="98" y="96" width="176" height="34" rx="17" fill="#FFF0DD"/>
   <text x="186" y="118" text-anchor="middle" fill="#EF6C2F" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" letter-spacing="2">DASHBOARD KEUANGAN</text>
   <text x="98" y="166" fill="#0F172A" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="700">Halo, Bayu</text>
-  <text x="98" y="196" fill="#475569" font-family="Arial, Helvetica, sans-serif" font-size="18">Catat pemasukan dan pengeluaran harian dalam satu tampilan.</text>
+  <text x="98" y="196" fill="#475569" font-family="Arial, Helvetica, sans-serif" font-size="18">Catat pemasukan, pengeluaran, dan tren arus kas dalam satu tampilan.</text>
 
   <rect x="991" y="98" width="115" height="48" rx="18" fill="#0F172A"/>
   <text x="1048" y="128" text-anchor="middle" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700">Logout</text>
@@ -59,15 +61,60 @@
 
   <text x="566" y="410" fill="#0F172A" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700">List transaksi</text>
   <text x="566" y="442" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="16">Pantau aktivitas terbaru dan fokus pada kategori tertentu.</text>
-  <rect x="566" y="474" width="118" height="40" rx="14" fill="#FFF0DD"/>
-  <text x="625" y="500" text-anchor="middle" fill="#C2410C" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700">Semua</text>
+  <rect x="984" y="392" width="118" height="40" rx="14" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="1043" y="418" text-anchor="middle" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700">Semua</text>
 
-  <rect x="566" y="536" width="536" height="62" rx="22" fill="white"/>
-  <rect x="566" y="610" width="536" height="62" rx="22" fill="white"/>
-  <text x="590" y="563" fill="#334155" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Gaji bulanan</text>
-  <text x="590" y="586" fill="#94A3B8" font-family="Arial, Helvetica, sans-serif" font-size="14">Gaji • 27 Mar 2026</text>
-  <text x="954" y="575" fill="#059669" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">+Rp8.000.000</text>
-  <text x="590" y="637" fill="#334155" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Belanja mingguan</text>
-  <text x="590" y="660" fill="#94A3B8" font-family="Arial, Helvetica, sans-serif" font-size="14">Belanja • 26 Mar 2026</text>
-  <text x="958" y="649" fill="#E11D48" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700">-Rp450.000</text>
+  <rect x="566" y="470" width="536" height="54" rx="20" fill="#F8FAFC"/>
+  <rect x="566" y="536" width="536" height="54" rx="20" fill="#F8FAFC"/>
+  <text x="590" y="493" fill="#334155" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Gaji bulanan</text>
+  <text x="590" y="514" fill="#94A3B8" font-family="Arial, Helvetica, sans-serif" font-size="14">Gaji • 27 Mar 2026</text>
+  <text x="952" y="503" fill="#059669" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700">+Rp8.000.000</text>
+  <text x="590" y="559" fill="#334155" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Belanja mingguan</text>
+  <text x="590" y="580" fill="#94A3B8" font-family="Arial, Helvetica, sans-serif" font-size="14">Belanja • 26 Mar 2026</text>
+  <text x="956" y="569" fill="#E11D48" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700">-Rp450.000</text>
+
+  <text x="98" y="692" fill="#0F172A" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700">Chart arus kas</text>
+  <text x="98" y="720" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="15">Pemasukan, pengeluaran, dan balance per bulan untuk 6 periode terbaru.</text>
+  <rect x="996" y="676" width="106" height="34" rx="17" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="1049" y="698" text-anchor="middle" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" letter-spacing="1">CHART.JS</text>
+
+  <line x1="124" y1="748" x2="1090" y2="748" stroke="#E2E8F0"/>
+  <line x1="124" y1="726" x2="124" y2="748" stroke="#CBD5E1"/>
+  <line x1="308" y1="734" x2="308" y2="748" stroke="#CBD5E1"/>
+  <line x1="492" y1="738" x2="492" y2="748" stroke="#CBD5E1"/>
+  <line x1="676" y1="728" x2="676" y2="748" stroke="#CBD5E1"/>
+  <line x1="860" y1="736" x2="860" y2="748" stroke="#CBD5E1"/>
+  <line x1="1044" y1="730" x2="1044" y2="748" stroke="#CBD5E1"/>
+
+  <rect x="150" y="728" width="44" height="20" rx="8" fill="#10B981" fill-opacity="0.78"/>
+  <rect x="334" y="710" width="44" height="38" rx="8" fill="#10B981" fill-opacity="0.78"/>
+  <rect x="518" y="686" width="44" height="62" rx="8" fill="#10B981" fill-opacity="0.78"/>
+  <rect x="702" y="700" width="44" height="48" rx="8" fill="#10B981" fill-opacity="0.78"/>
+  <rect x="886" y="676" width="44" height="72" rx="8" fill="#10B981" fill-opacity="0.78"/>
+
+  <rect x="206" y="736" width="44" height="12" rx="8" fill="#F43F5E" fill-opacity="0.72"/>
+  <rect x="390" y="724" width="44" height="24" rx="8" fill="#F43F5E" fill-opacity="0.72"/>
+  <rect x="574" y="716" width="44" height="32" rx="8" fill="#F43F5E" fill-opacity="0.72"/>
+  <rect x="758" y="718" width="44" height="30" rx="8" fill="#F43F5E" fill-opacity="0.72"/>
+  <rect x="942" y="708" width="44" height="40" rx="8" fill="#F43F5E" fill-opacity="0.72"/>
+
+  <path d="M172 714C203 709 230 707 356 689C470 672 535 659 724 665C867 670 933 649 964 640" stroke="#0F172A" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="172" cy="714" r="6" fill="#0F172A"/>
+  <circle cx="356" cy="689" r="6" fill="#0F172A"/>
+  <circle cx="540" cy="670" r="6" fill="#0F172A"/>
+  <circle cx="724" cy="665" r="6" fill="#0F172A"/>
+  <circle cx="908" cy="651" r="6" fill="#0F172A"/>
+
+  <text x="146" y="786" fill="#94A3B8" font-family="Arial, Helvetica, sans-serif" font-size="13">Jan</text>
+  <text x="330" y="786" fill="#94A3B8" font-family="Arial, Helvetica, sans-serif" font-size="13">Feb</text>
+  <text x="514" y="786" fill="#94A3B8" font-family="Arial, Helvetica, sans-serif" font-size="13">Mar</text>
+  <text x="698" y="786" fill="#94A3B8" font-family="Arial, Helvetica, sans-serif" font-size="13">Apr</text>
+  <text x="882" y="786" fill="#94A3B8" font-family="Arial, Helvetica, sans-serif" font-size="13">Mei</text>
+
+  <circle cx="716" cy="693" r="5" fill="#10B981"/>
+  <text x="728" y="698" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="13">Pemasukan</text>
+  <circle cx="830" cy="693" r="5" fill="#F43F5E"/>
+  <text x="842" y="698" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="13">Pengeluaran</text>
+  <circle cx="956" cy="693" r="5" fill="#0F172A"/>
+  <text x="968" y="698" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="13">Balance</text>
 </svg>

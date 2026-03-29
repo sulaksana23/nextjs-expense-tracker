@@ -51,6 +51,7 @@ sampai menengah.
 - Autentikasi custom dengan register, login, logout, dan password hashing.
 - Session berbasis database dengan cookie `httpOnly`.
 - Dashboard transaksi dalam satu halaman dengan ringkasan balance, income, dan expense.
+- Chart bulanan untuk membandingkan pemasukan, pengeluaran, dan balance.
 - Form transaksi untuk pemasukan dan pengeluaran dengan kategori bawaan.
 - Filter kategori untuk memfokuskan daftar transaksi yang sedang dilihat.
 - Rendering data dari server menggunakan Next.js App Router dan Server Actions.
@@ -201,7 +202,6 @@ npm run lint
 ## Roadmap Pengembangan
 
 - Menambahkan edit dan delete transaksi.
-- Menambahkan chart bulanan untuk tren pemasukan dan pengeluaran.
 - Menambahkan pagination atau virtualized list jika data transaksi makin besar.
 - Menambahkan test untuk auth flow dan transaction actions.
 
