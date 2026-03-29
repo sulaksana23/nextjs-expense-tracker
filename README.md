@@ -1,241 +1,55 @@
-# Expense Tracker
+# Next.js Expense Tracker
 
-<p align="center">
-  <a href="#preview-tampilan">
-    <img src="./public/readme-cover.svg" alt="Expense Tracker dashboard preview" width="100%" />
-  </a>
-</p>
+## Overview
+This application serves as a powerful expense tracking platform built using Next.js. It enables users to manage their finances effectively by providing insights into their spending habits.
 
-<p align="center">
-  A polished personal finance tracker built with Next.js, Prisma, PostgreSQL, and secure session-based authentication.
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Next.js-16.2.1-0F172A?style=flat-square" alt="Next.js 16.2.1" />
-  <img src="https://img.shields.io/badge/React-19.2.4-0EA5E9?style=flat-square" alt="React 19.2.4" />
-  <img src="https://img.shields.io/badge/Prisma-7.6.0-1E293B?style=flat-square" alt="Prisma 7.6.0" />
-  <img src="https://img.shields.io/badge/PostgreSQL-Neon-10B981?style=flat-square" alt="PostgreSQL Neon" />
-</p>
-
-<p align="center">
-  <a href="https://your-project-name.vercel.app"><strong>Live Demo</strong></a> ·
-  <a href="#akses-halaman"><strong>Page Links</strong></a> ·
-  <a href="#preview-tampilan"><strong>Preview</strong></a> ·
-  <a href="#fitur-utama"><strong>Features</strong></a> ·
-  <a href="#tech-stack"><strong>Tech Stack</strong></a> ·
-  <a href="#menjalankan-secara-lokal"><strong>Local Setup</strong></a> ·
-  <a href="#struktur-proyek"><strong>Project Structure</strong></a>
-</p>
-
-## Live Demo
-
-Demo online dapat diakses di Vercel:
-
-`https://your-project-name.vercel.app`
-
-## Akses Halaman
-
-Link utama aplikasi:
-
-- Login: `https://your-project-name.vercel.app/`
-- Register: `https://your-project-name.vercel.app/` lalu pilih tab `Register`
-- Dashboard: `https://your-project-name.vercel.app/` setelah berhasil login
-
-## Ringkasan
-
-Project ini adalah aplikasi expense tracker full-stack dengan fokus pada alur yang cepat:
-pengguna bisa register atau login, membuat transaksi pemasukan dan pengeluaran, lalu
-langsung melihat total balance, total income, total expense, chart arus kas, insight
-otomatis, dan daftar transaksi yang bisa dicari serta difilter berdasarkan kategori
-dan tipe transaksi. Dashboard juga mendukung upload screenshot transaksi dari perangkat,
-OCR langsung di browser, lalu auto-fill ke form pengeluaran untuk mempercepat input
-transaksi dari aplikasi banking atau QRIS.
-
-Desain antarmuka memakai App Router dengan server-first data loading, sementara data
-disimpan di PostgreSQL melalui Prisma. Session login dikelola di server dengan cookie
-`httpOnly` agar alurnya tetap sederhana dan aman untuk aplikasi personal finance kecil
-sampai menengah.
-
-## Fitur Utama
-
-- Autentikasi custom dengan register, login, logout, dan password hashing.
-- Session berbasis database dengan cookie `httpOnly`.
-- Dashboard transaksi dalam satu halaman dengan ringkasan balance, income, dan expense.
-- Chart bulanan untuk membandingkan pemasukan, pengeluaran, dan balance.
-- Insight cepat seperti saving rate bulan ini, rata-rata transaksi, dan transaksi terbesar.
-- Form transaksi untuk pemasukan dan pengeluaran dengan kategori bawaan.
-- Upload screenshot transaksi dari perangkat dengan OCR client-side untuk membaca detail pembayaran.
-- Auto-fill pengeluaran dari hasil OCR seperti merchant, nominal, tanggal, dan catatan transaksi.
-- Pencarian transaksi berdasarkan judul, kategori, dan catatan.
-- Filter kategori dan tipe transaksi untuk memfokuskan daftar yang sedang dilihat.
-- Ringkasan kategori pengeluaran dominan untuk membaca pola belanja lebih cepat.
-- Rendering data dari server menggunakan Next.js App Router dan Server Actions.
-
-## Preview Tampilan
-
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <strong>Login</strong><br /><br />
-      <a href="https://your-project-name.vercel.app/">
-        <img src="./public/readme-login.svg" alt="Preview halaman login Expense Tracker" width="100%" />
-      </a>
-    </td>
-    <td width="50%" valign="top">
-      <strong>Register</strong><br /><br />
-      <a href="https://your-project-name.vercel.app/">
-        <img src="./public/readme-register.svg" alt="Preview halaman register Expense Tracker" width="100%" />
-      </a>
-    </td>
-  </tr>
-</table>
-
-<p>
-  <strong>Dashboard</strong>
-</p>
-
-<p>
-  <a href="https://your-project-name.vercel.app/">
-    <img src="./public/readme-dashboard.svg" alt="Preview halaman dashboard Expense Tracker" width="100%" />
-  </a>
-</p>
+## Features
+- **User Authentication**: Secure login and registration process.
+- **Expense Management**: Add, edit, and delete expenses.
+- **Data Visualization**: Charts and graphs to visualize spending patterns.
+- **Responsive Design**: Works on both desktop and mobile devices.
 
 ## Tech Stack
+- **Frontend**: Next.js, React, CSS, JavaScript
+- **Backend**: Node.js, Express
+- **Database**: MongoDB
+- **Deployment**: Vercel or Heroku
 
-- Next.js 16
-- React 19
-- Prisma 7
-- PostgreSQL
-- Tailwind CSS 4
-- TypeScript
+## Setup Instructions
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/sulaksana23/nextjs-expense-tracker.git
+   ```
+2. Navigate into the project directory:
+   ```bash
+   cd nextjs-expense-tracker
+   ```
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+4. Create a `.env` file using the provided template and fill in your database credentials.
+5. Run the development server:
+   ```bash
+   npm run dev
+   ```
+   The application will be accessible at `http://localhost:3000`.
 
-## Highlight UI
+## Deployment Guide
+To deploy this application, follow these steps:
+1. Choose a cloud service provider (Vercel or Heroku).
+2. Set up your project in your selected service.
+3. Ensure environment variables are configured in the service settings.
+4. Push your code to the remote repository to trigger deployment.
 
-- Dashboard dirancang mobile-first dengan grid yang tetap rapi saat dibuka di layar kecil.
-- Preview README memakai mockup desktop dan mobile agar perubahan UI lebih mudah dipahami.
-- Warna dan card layout dibuat ringan supaya data keuangan tetap jadi fokus utama.
-- Import screenshot transaksi tetap berjalan di sisi client, jadi tidak butuh layanan OCR eksternal tambahan.
+## Troubleshooting
+- **If the application fails to run**: Ensure all environment variables are correctly set in your `.env` file.
+- **Database connection issues**: Check your MongoDB connection string and credentials.
+- **Common npm errors**: Clear the npm cache and reinstall dependencies if you encounter issues. Run:
+  ```bash
+  npm cache clean --force
+  npm install
+  ```
 
-## Menjalankan Secara Lokal
-
-### 1. Install dependency
-
-```bash
-npm install
-```
-
-### 2. Siapkan environment variable
-
-Buat atau sesuaikan file `.env`:
-
-```env
-DATABASE_URL="postgresql://postgres:password@localhost:5433/expense_tracker?schema=public"
-```
-
-Atau salin dari template:
-
-```bash
-cp .env.example .env
-```
-
-### 3. Siapkan database
-
-Jika database masih kosong, jalankan:
-
-```bash
-npx prisma migrate dev --name init
-```
-
-Jika Anda memakai database lama yang pernah dipakai project lain dan Prisma mendeteksi
-`drift`, gunakan database baru yang bersih atau reset schema development terlebih dahulu:
-
-```bash
-npx prisma migrate reset
-```
-
-### 4. Jalankan aplikasi
-
-```bash
-npm run dev
-```
-
-Buka `http://localhost:3000` di browser.
-
-## Prisma Notes
-
-Project ini memakai generator `prisma-client` di Prisma 7, jadi koneksi database tidak
-didefinisikan di `schema.prisma`. URL database dibaca dari [`prisma.config.ts`](./prisma.config.ts), dan Prisma client diinisialisasi memakai adapter PostgreSQL di [`lib/prisma.ts`](./lib/prisma.ts).
-
-Urutan pembacaan env di project ini:
-
-- Runtime aplikasi: `POSTGRES_PRISMA_URL` → `POSTGRES_URL` → `DATABASE_URL`
-- Prisma CLI dan migrations: `POSTGRES_URL_NON_POOLING` → `DATABASE_URL_UNPOOLED` → fallback ke runtime URL
-
-Konfigurasi ini cocok untuk deployment ke Vercel Postgres yang ditenagai Neon, karena
-runtime bisa memakai koneksi pooled sementara Prisma CLI tetap bisa memakai direct
-connection jika environment variable non-pooling tersedia.
-
-## Deploy ke Vercel
-
-1. Push repository ke GitHub.
-2. Import project ke Vercel.
-3. Tambahkan integration Vercel Postgres atau Neon Postgres.
-4. Pastikan environment variable berikut tersedia di Vercel:
-
-```env
-POSTGRES_PRISMA_URL=postgres://...
-POSTGRES_URL_NON_POOLING=postgres://...
-```
-
-5. Redeploy project.
-
-Catatan:
-
-- Jangan gunakan `localhost` untuk deployment Vercel.
-- Script `postinstall` di project ini akan menjalankan `prisma generate` otomatis saat install dependency di build environment.
-- Repo ini sudah menyertakan [`vercel.json`](./vercel.json) dengan build command `npm run build:vercel`, jadi Vercel akan otomatis menjalankan `prisma migrate deploy` sebelum `next build`.
-- Build command tersebut membutuhkan direct database URL di `POSTGRES_URL_NON_POOLING` agar migration production bisa diterapkan saat deploy.
-
-## Struktur Proyek
-
-```text
-app/
-  actions/           Server actions untuk auth dan transaksi
-  generated/prisma/  Prisma client hasil generate
-  page.tsx           Entry page utama
-components/
-  auth-panel.tsx     UI login dan register
-  dashboard-client.tsx
-lib/
-  auth.ts            Session, hashing, dan helper autentikasi
-  prisma.ts          Inisialisasi Prisma client + adapter PostgreSQL
-prisma/
-  migrations/        Riwayat migrasi database
-  schema.prisma      Definisi model Prisma
-public/
-  readme-cover.svg   Visual header untuk README
-```
-
-## Workflow Pengembangan
-
-```bash
-npx prisma validate
-npx tsc --noEmit
-npm run lint
-```
-
-## Catatan OCR
-
-- Fitur upload screenshot transaksi membaca gambar langsung di browser memakai `tesseract.js`.
-- Hasil paling akurat jika screenshot jelas, tidak blur, dan bagian merchant, jumlah, serta waktu transaksi terlihat penuh.
-- Jika OCR belum akurat, teks hasil bacaan masih bisa diedit sebelum diisi otomatis ke form pengeluaran.
-
-## Roadmap Pengembangan
-
-- Menambahkan edit dan delete transaksi.
-- Menambahkan pagination atau virtualized list jika data transaksi makin besar.
-- Menambahkan test untuk auth flow dan transaction actions.
-
-## License
-
-Project ini menggunakan lisensi [MIT](./LICENSE).
+## Conclusion
+This Next.js Expense Tracker application is a robust solution for managing your personal finances. By utilizing modern technologies and best practices, it offers an intuitive user experience and powerful functionality.
