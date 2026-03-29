@@ -1,14 +1,24 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect, unstable_rethrow } from "next/navigation";
+import { unstable_rethrow } from "next/navigation";
 import { TransactionType } from "@/app/generated/prisma/enums";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logRuntimeError } from "@/lib/runtime-error";
 
 export type TransactionState = {
+  createdTransaction?: {
+    amount: number;
+    category: string;
+    id: string;
+    note: string | null;
+    occurredAt: string;
+    title: string;
+    type: TransactionType;
+  };
   error?: string;
+  success?: boolean;
 };
 
 function readText(formData: FormData, key: string) {
@@ -49,7 +59,7 @@ export async function createTransactionAction(
       return { error: "Tipe transaksi tidak valid." };
     }
 
-    await prisma.transaction.create({
+    const transaction = await prisma.transaction.create({
       data: {
         title,
         category,
@@ -62,7 +72,19 @@ export async function createTransactionAction(
     });
 
     revalidatePath("/");
-    redirect("/");
+
+    return {
+      createdTransaction: {
+        amount: Number(transaction.amount),
+        category: transaction.category,
+        id: transaction.id,
+        note: transaction.note,
+        occurredAt: transaction.occurredAt.toISOString(),
+        title: transaction.title,
+        type: transaction.type,
+      },
+      success: true,
+    };
   } catch (error) {
     unstable_rethrow(error);
     logRuntimeError({ area: "create-transaction-action" }, error);

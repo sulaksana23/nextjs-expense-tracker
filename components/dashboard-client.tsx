@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useDeferredValue, useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { logoutAction } from "@/app/actions/auth";
 import {
@@ -229,6 +229,8 @@ export default function DashboardClient({
   userName,
   transactions,
 }: DashboardClientProps) {
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const [clientTransactions, setClientTransactions] = useState(transactions);
   const [type, setType] = useState<TransactionType>("EXPENSE");
   const [amountInput, setAmountInput] = useState("");
   const [titleInput, setTitleInput] = useState("");
@@ -245,27 +247,24 @@ export default function DashboardClient({
   const [receiptImportState, setReceiptImportState] = useState("");
   const [receiptImageName, setReceiptImageName] = useState("");
   const [isProcessingReceiptImage, setIsProcessingReceiptImage] = useState(false);
+  const [transactionState, setTransactionState] = useState<TransactionState>({});
   const deferredCategory = useDeferredValue(selectedCategory);
   const deferredSearchQuery = useDeferredValue(searchQuery.trim().toLowerCase());
-  const [transactionState, transactionAction] = useActionState(
-    createTransactionAction,
-    initialTransactionState,
-  );
   const formCategoryOptions =
     type === "INCOME" ? incomeCategories : expenseCategories;
 
   const categories = useMemo(() => {
     const source = new Set<string>(["Semua"]);
 
-    for (const transaction of transactions) {
+    for (const transaction of clientTransactions) {
       source.add(transaction.category);
     }
 
     return Array.from(source);
-  }, [transactions]);
+  }, [clientTransactions]);
 
   const filteredTransactions = useMemo(() => {
-    return transactions.filter((transaction) => {
+    return clientTransactions.filter((transaction) => {
       if (
         deferredCategory !== "Semua" &&
         transaction.category !== deferredCategory
@@ -294,10 +293,10 @@ export default function DashboardClient({
 
       return haystack.includes(deferredSearchQuery);
     });
-  }, [deferredCategory, deferredSearchQuery, selectedTypeFilter, transactions]);
+  }, [clientTransactions, deferredCategory, deferredSearchQuery, selectedTypeFilter]);
 
   const totals = useMemo(() => {
-    return transactions.reduce(
+    return clientTransactions.reduce(
       (accumulator, transaction) => {
         if (transaction.type === "INCOME") {
           accumulator.income += transaction.amount;
@@ -309,7 +308,7 @@ export default function DashboardClient({
       },
       { income: 0, expense: 0 },
     );
-  }, [transactions]);
+  }, [clientTransactions]);
 
   const filteredTotals = useMemo(() => {
     return filteredTransactions.reduce(
@@ -488,10 +487,39 @@ export default function DashboardClient({
     }
   }
 
+  async function handleCreateTransaction(formData: FormData) {
+    const result = await createTransactionAction(initialTransactionState, formData);
+    const createdTransaction = result.createdTransaction;
+
+    setTransactionState(result);
+
+    if (!result.success || !createdTransaction) {
+      return;
+    }
+
+    setClientTransactions((currentTransactions) =>
+      [createdTransaction, ...currentTransactions].sort(
+        (left, right) =>
+          new Date(right.occurredAt).getTime() - new Date(left.occurredAt).getTime(),
+      ),
+    );
+
+    setType("EXPENSE");
+    setAmountInput("");
+    setTitleInput("");
+    setNoteInput("");
+    setOccurredAtInput(new Date().toISOString().slice(0, 10));
+    setFormCategory(expenseCategories[0]);
+    setReceiptImportText("");
+    setReceiptImportState("Transaksi berhasil ditambahkan tanpa refresh halaman.");
+    setReceiptImageName("");
+    formRef.current?.reset();
+  }
+
   return (
     <div className="min-h-screen bg-[var(--background)] px-2.5 py-2.5 text-slate-900 sm:px-3 sm:py-3 md:px-4 md:py-4">
       <div className="mx-auto grid w-full max-w-6xl gap-2.5">
-        <header className="grid gap-3 rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3.5 lg:grid-cols-[1.2fr_0.8fr]">
+        <header className="grid gap-3 rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex w-fit rounded-full bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-700">
@@ -502,10 +530,10 @@ export default function DashboardClient({
               </span>
             </div>
             <div className="space-y-1">
-              <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
+              <h1 className="text-lg font-semibold tracking-tight sm:text-xl">
                 Halo, {userName}
               </h1>
-              <p className="max-w-2xl text-sm leading-5 text-slate-600">
+              <p className="max-w-2xl text-xs leading-5 text-slate-600 sm:text-sm">
                 Semua pemasukan dan pengeluaran yang tampil di dashboard ini hanya milik
                 akun yang sedang login.
               </p>
@@ -515,7 +543,7 @@ export default function DashboardClient({
           <form action={logoutAction} className="flex items-start justify-start lg:justify-end">
             <button
               type="submit"
-              className="w-full rounded-xl border border-slate-200 bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 sm:w-auto"
+              className="w-full rounded-xl border border-slate-200 bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 sm:w-auto"
             >
               Logout
             </button>
@@ -553,11 +581,11 @@ export default function DashboardClient({
           ].map((card) => (
             <article
               key={card.label}
-              className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3.5"
+              className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3"
             >
               <p className="text-xs uppercase tracking-[0.16em] text-slate-500">{card.label}</p>
               <h2
-                className={`pt-1.5 text-lg font-semibold tracking-tight sm:text-xl ${card.tone}`}
+                className={`pt-1 text-base font-semibold tracking-tight sm:text-lg ${card.tone}`}
               >
                 {card.value}
               </h2>
@@ -566,32 +594,32 @@ export default function DashboardClient({
         </section>
 
         <section className="grid gap-3 lg:grid-cols-[0.92fr_1.08fr]">
-          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3.5 sm:p-4">
+          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5">
             <div className="space-y-1.5">
               <div className="flex items-center justify-between gap-3">
-                <h2 className="text-lg font-semibold text-slate-900">Tambah transaksi</h2>
+                <h2 className="text-base font-semibold text-slate-900">Tambah transaksi</h2>
                 <span className="rounded-full border border-[var(--border-soft)] bg-[var(--surface-soft)] px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-slate-500">
                   Akun sendiri
                 </span>
               </div>
-              <p className="text-sm leading-5 text-slate-600">
+              <p className="text-xs leading-5 text-slate-600 sm:text-sm">
                 Gunakan form ini untuk menambah income atau expense ke akun kamu.
               </p>
             </div>
 
             {transactionState?.error ? (
-              <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
                 {transactionState.error}
               </div>
             ) : null}
 
-            <form action={transactionAction} className="grid gap-3 pt-4">
-              <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3.5">
+            <form ref={formRef} action={handleCreateTransaction} className="grid gap-2.5 pt-3">
+              <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3">
                 <div className="space-y-1">
-                  <h3 className="text-sm font-semibold text-slate-900">
+                  <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-900">
                     Import dari detail transaksi
                   </h3>
-                  <p className="text-sm leading-5 text-slate-500">
+                  <p className="text-xs leading-5 text-slate-500 sm:text-sm">
                     Tempel teks hasil copy atau OCR dari screenshot QRIS/banking seperti
                     rincian merchant, jumlah, dan waktu transaksi. Form akan otomatis
                     diarahkan ke pengeluaran.
@@ -599,13 +627,13 @@ export default function DashboardClient({
                 </div>
 
                 <div className="grid gap-2.5 pt-3">
-                  <label className="grid gap-2 text-sm text-slate-600">
+                  <label className="grid gap-1.5 text-xs text-slate-600 sm:text-sm">
                     <span>Upload screenshot dari perangkat</span>
                     <input
                       type="file"
                       accept="image/*"
                       onChange={handleReceiptImageChange}
-                      className="block w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2.5 text-sm text-slate-900 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-700"
+                      className="block w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm text-slate-900 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-slate-700"
                     />
                     <p className="text-xs leading-5 text-slate-500">
                       Pilih gambar dari sistem, lalu app akan mencoba membaca teks
@@ -623,7 +651,7 @@ export default function DashboardClient({
                     onChange={(event) => setReceiptImportText(event.target.value)}
                     rows={4}
                     placeholder={`Contoh:\nKe\nKFC TRAGIA NUSA DUA\nJumlah\nRp 22.000\nMetode Transaksi\nQRIS\nWaktu Transaksi\n29 Mar 2026, 12:22`}
-                    className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
+                    className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
                   />
 
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -631,7 +659,7 @@ export default function DashboardClient({
                       type="button"
                       onClick={handleReceiptImport}
                       disabled={isProcessingReceiptImage}
-                      className="inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:border-slate-300 disabled:opacity-60 sm:w-auto"
+                      className="inline-flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:border-slate-300 disabled:opacity-60 sm:w-auto"
                     >
                       {isProcessingReceiptImage
                         ? "Memproses gambar..."
@@ -639,14 +667,14 @@ export default function DashboardClient({
                     </button>
 
                     {receiptImportState ? (
-                      <p className="text-sm text-slate-500">{receiptImportState}</p>
+                      <p className="text-xs text-slate-500 sm:text-sm">{receiptImportState}</p>
                     ) : null}
                   </div>
                 </div>
               </div>
 
               <div className="grid gap-1.5">
-                <span className="text-sm text-slate-600">Tipe transaksi</span>
+                <span className="text-xs text-slate-600 sm:text-sm">Tipe transaksi</span>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {[
                     { label: "Pengeluaran", value: "EXPENSE" as const },
@@ -654,7 +682,7 @@ export default function DashboardClient({
                   ].map((option) => (
                     <label
                       key={option.value}
-                      className={`rounded-xl border px-4 py-2.5 text-center text-sm font-medium transition ${
+                      className={`rounded-xl border px-4 py-2 text-center text-xs font-medium transition sm:text-sm ${
                         type === option.value
                           ? "border-slate-900 bg-slate-900 text-white"
                           : "border-[var(--border-soft)] bg-[var(--surface-soft)] text-slate-600 hover:border-slate-300"
@@ -684,20 +712,20 @@ export default function DashboardClient({
                 </div>
               </div>
 
-              <label className="grid gap-1.5 text-sm text-slate-600">
+              <label className="grid gap-1.5 text-xs text-slate-600 sm:text-sm">
                 <span>Judul transaksi</span>
                 <input
                   name="title"
                   value={titleInput}
                   onChange={(event) => setTitleInput(event.target.value)}
                   placeholder={type === "INCOME" ? "Gaji bulanan" : "Makan siang"}
-                  className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
+                  className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
                   required
                 />
               </label>
 
               <div className="grid gap-3 xl:grid-cols-2">
-                <label className="grid gap-1.5 text-sm text-slate-600">
+                <label className="grid gap-1.5 text-xs text-slate-600 sm:text-sm">
                   <span>Nominal</span>
                   <input name="amount" type="hidden" value={amountInput} />
                   <input
@@ -708,32 +736,32 @@ export default function DashboardClient({
                     onChange={(event) =>
                       setAmountInput(event.target.value.replace(/\D/g, ""))
                     }
-                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
+                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
                     required
                   />
                 </label>
 
-                <label className="grid gap-1.5 text-sm text-slate-600">
+                <label className="grid gap-1.5 text-xs text-slate-600 sm:text-sm">
                   <span>Tanggal</span>
                   <input
                     name="occurredAt"
                     type="date"
                     value={occurredAtInput}
                     onChange={(event) => setOccurredAtInput(event.target.value)}
-                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-400"
+                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm text-slate-900 outline-none focus:border-slate-400"
                     required
                   />
                 </label>
               </div>
 
               <div className="grid gap-3 xl:grid-cols-2">
-                <label className="grid gap-1.5 text-sm text-slate-600">
+                <label className="grid gap-1.5 text-xs text-slate-600 sm:text-sm">
                   <span>Kategori</span>
                   <select
                     name="category"
                     value={formCategory}
                     onChange={(event) => setFormCategory(event.target.value)}
-                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-400"
+                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm text-slate-900 outline-none focus:border-slate-400"
                   >
                     {formCategoryOptions.map((option) => (
                       <option key={option} value={option} className="text-slate-900">
@@ -743,14 +771,14 @@ export default function DashboardClient({
                   </select>
                 </label>
 
-                <label className="grid gap-1.5 text-sm text-slate-600">
+                <label className="grid gap-1.5 text-xs text-slate-600 sm:text-sm">
                   <span>Catatan</span>
                   <input
                     name="note"
                     value={noteInput}
                     onChange={(event) => setNoteInput(event.target.value)}
                     placeholder="Opsional"
-                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
+                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
                   />
                 </label>
               </div>
@@ -759,33 +787,33 @@ export default function DashboardClient({
             </form>
           </article>
 
-          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3.5 sm:p-4">
+          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0">
-                <h2 className="text-lg font-semibold">List transaksi</h2>
-                <p className="pt-1 text-sm leading-5 text-slate-500">
+                <h2 className="text-base font-semibold">List transaksi</h2>
+                <p className="pt-1 text-xs leading-5 text-slate-500 sm:text-sm">
                   Hanya transaksi milik akun ini yang ditampilkan. Filter kategori
                   membantu review arus kas jadi lebih cepat.
                 </p>
               </div>
 
               <div className="grid w-full gap-2.5 lg:w-auto lg:min-w-72">
-                <label className="grid gap-1.5 text-sm text-slate-500">
+                <label className="grid gap-1.5 text-xs text-slate-500 sm:text-sm">
                   <span>Cari transaksi</span>
                   <input
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
                     placeholder="Cari judul, kategori, atau catatan"
-                    className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
+                    className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
                   />
                 </label>
 
-                <label className="grid gap-1.5 text-sm text-slate-500">
+                <label className="grid gap-1.5 text-xs text-slate-500 sm:text-sm">
                   <span>Filter kategori</span>
                   <select
                     value={selectedCategory}
                     onChange={(event) => setSelectedCategory(event.target.value)}
-                    className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-400"
+                    className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm text-slate-900 outline-none focus:border-slate-400"
                   >
                     {categories.map((category) => (
                       <option key={category} value={category}>
@@ -822,7 +850,7 @@ export default function DashboardClient({
                     key={option.value}
                     type="button"
                     onClick={() => setSelectedTypeFilter(option.value)}
-                    className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                    className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
                       selectedTypeFilter === option.value
                         ? "bg-slate-900 text-white"
                         : "border border-[var(--border-soft)] bg-white text-slate-600 hover:border-slate-300"
@@ -838,7 +866,7 @@ export default function DashboardClient({
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
                     Income Filtered
                   </p>
-                  <p className="pt-1.5 text-base font-semibold text-emerald-600">
+                  <p className="pt-1 text-sm font-semibold text-emerald-600 sm:text-base">
                     {formatCurrency(filteredTotals.income)}
                   </p>
                 </div>
@@ -846,7 +874,7 @@ export default function DashboardClient({
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
                     Expense Filtered
                   </p>
-                  <p className="pt-1.5 text-base font-semibold text-rose-600">
+                  <p className="pt-1 text-sm font-semibold text-rose-600 sm:text-base">
                     {formatCurrency(filteredTotals.expense)}
                   </p>
                 </div>
@@ -854,7 +882,7 @@ export default function DashboardClient({
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
                     Balance Filtered
                   </p>
-                  <p className="pt-1.5 text-base font-semibold text-slate-900">
+                  <p className="pt-1 text-sm font-semibold text-slate-900 sm:text-base">
                     {formatCurrency(filteredTotals.income - filteredTotals.expense)}
                   </p>
                 </div>
@@ -874,7 +902,7 @@ export default function DashboardClient({
                 >
                     <div className="min-w-0 space-y-1.5">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="break-words text-base font-semibold text-slate-900">
+                        <h3 className="break-words text-sm font-semibold text-slate-900 sm:text-base">
                           {transaction.title}
                         </h3>
                         <span
@@ -897,7 +925,7 @@ export default function DashboardClient({
                     </div>
 
                     <div
-                      className={`text-left text-base font-semibold tracking-tight sm:text-lg md:text-right ${
+                      className={`text-left text-sm font-semibold tracking-tight sm:text-base md:text-right ${
                         transaction.type === "INCOME"
                           ? "text-emerald-600"
                           : "text-rose-600"
@@ -913,11 +941,11 @@ export default function DashboardClient({
           </article>
         </section>
 
-        <section className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3.5 sm:p-4">
+        <section className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Chart arus kas</h2>
-              <p className="pt-1 text-sm leading-5 text-slate-500">
+              <h2 className="text-base font-semibold text-slate-900">Chart arus kas</h2>
+              <p className="pt-1 text-xs leading-5 text-slate-500 sm:text-sm">
                 Perbandingan pemasukan, pengeluaran, dan balance per bulan untuk 6
                 periode terbaru.
               </p>
@@ -932,39 +960,39 @@ export default function DashboardClient({
           </div>
         </section>
 
-        <section className="grid gap-3 lg:grid-cols-[0.9fr_1.1fr]">
-          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3.5 sm:p-4">
+        <section className="grid gap-2.5 lg:grid-cols-[0.9fr_1.1fr]">
+          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5">
             <div className="space-y-1">
-              <h2 className="text-lg font-semibold text-slate-900">Insight cepat</h2>
-              <p className="text-sm leading-5 text-slate-500">
+              <h2 className="text-base font-semibold text-slate-900">Insight cepat</h2>
+              <p className="text-xs leading-5 text-slate-500 sm:text-sm">
                 Ringkasan otomatis dari transaksi yang sedang tampil di dashboard.
               </p>
             </div>
 
             <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
-              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3.5">
+              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
                   Rata-rata transaksi
                 </p>
-                <p className="pt-1.5 text-base font-semibold text-slate-900">
+                <p className="pt-1 text-sm font-semibold text-slate-900 sm:text-base">
                   {formatCurrency(highlightMetrics.averageAmount)}
                 </p>
               </article>
 
-              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3.5">
+              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
                   Aktivitas 30 hari
                 </p>
-                <p className="pt-1.5 text-base font-semibold text-slate-900">
+                <p className="pt-1 text-sm font-semibold text-slate-900 sm:text-base">
                   {highlightMetrics.recentTransactions} transaksi
                 </p>
               </article>
 
-              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3.5">
+              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
                   Saving rate bulan ini
                 </p>
-                <p className="pt-1.5 text-base font-semibold text-emerald-600">
+                <p className="pt-1 text-sm font-semibold text-emerald-600 sm:text-base">
                   {highlightMetrics.savingsRate}%
                 </p>
                 <p className="pt-1 text-sm text-slate-500">
@@ -972,11 +1000,11 @@ export default function DashboardClient({
                 </p>
               </article>
 
-              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3.5">
+              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
                   Transaksi terbesar
                 </p>
-                <p className="pt-1.5 text-base font-semibold text-slate-900">
+                <p className="pt-1 text-sm font-semibold text-slate-900 sm:text-base">
                   {highlightMetrics.largestTransaction
                     ? formatCurrency(highlightMetrics.largestTransaction.amount)
                     : "Belum ada data"}
@@ -992,10 +1020,10 @@ export default function DashboardClient({
             </div>
           </article>
 
-          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3.5 sm:p-4">
+          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5">
             <div className="space-y-1">
-              <h2 className="text-lg font-semibold text-slate-900">Kategori pengeluaran</h2>
-              <p className="text-sm leading-5 text-slate-500">
+              <h2 className="text-base font-semibold text-slate-900">Kategori pengeluaran</h2>
+              <p className="text-xs leading-5 text-slate-500 sm:text-sm">
                 Kategori paling dominan dari transaksi yang sedang difilter.
               </p>
             </div>
@@ -1016,14 +1044,14 @@ export default function DashboardClient({
                   return (
                     <div
                       key={item.category}
-                      className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3.5"
+                      className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3"
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-slate-900">
+                          <p className="text-xs font-semibold text-slate-900 sm:text-sm">
                             {index + 1}. {item.category}
                           </p>
-                          <p className="pt-1 text-sm text-slate-500">
+                          <p className="pt-1 text-xs text-slate-500 sm:text-sm">
                             {formatCurrency(item.amount)}
                           </p>
                         </div>
