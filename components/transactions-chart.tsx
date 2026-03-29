@@ -162,7 +162,9 @@ export default function TransactionsChart({
             callbacks: {
               label(context) {
                 const datasetLabel = context.dataset.label ?? "Nilai";
-                return `${datasetLabel}: ${formatCurrency(context.parsed.y)}`;
+                const amount =
+                  typeof context.parsed.y === "number" ? context.parsed.y : 0;
+                return `${datasetLabel}: ${formatCurrency(amount)}`;
               },
             },
           },
