@@ -8,6 +8,7 @@ import {
   type TransactionState,
 } from "@/app/actions/transactions";
 import type { TransactionType } from "@/app/generated/prisma/enums";
+import TransactionsChart from "@/components/transactions-chart";
 
 type TransactionView = {
   id: string;
@@ -458,6 +459,25 @@ export default function DashboardClient({
               )}
             </div>
           </article>
+        </section>
+
+        <section className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 sm:p-5">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-slate-900">Chart arus kas</h2>
+              <p className="pt-1 text-sm leading-6 text-slate-500">
+                Perbandingan pemasukan, pengeluaran, dan balance per bulan untuk 6
+                periode terbaru.
+              </p>
+            </div>
+            <span className="inline-flex w-fit rounded-full border border-[var(--border-soft)] bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+              Chart.js
+            </span>
+          </div>
+
+          <div className="pt-5">
+            <TransactionsChart transactions={transactions} />
+          </div>
         </section>
       </div>
     </div>
