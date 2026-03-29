@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0f172a;
-  --foreground: #f1f5f9;
-  --accent: #3b82f6;
-  --accent-strong: #2563eb;
+  --background: #f4f1ea;
+  --foreground: #0f172a;
+  --accent: #1d4ed8;
+  --accent-strong: #0f172a;
   --accent-soft: #dbeafe;
-  --muted-foreground: #94a3b8;
-  --surface-soft: #1e293b;
-  --surface-card: #1a2332;
-  --border-soft: #334155;
+  --muted-foreground: #64748b;
+  --surface-soft: #f8fafc;
+  --surface-card: #fffdf9;
+  --border-soft: #d8dee8;
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
@@ -29,7 +29,10 @@
 }
 
 html {
-  background: linear-gradient(135deg, var(--background) 0%, #0d1117 100%);
+  background:
+    radial-gradient(circle at top left, rgba(251, 146, 60, 0.08), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.08), transparent 30%),
+    linear-gradient(180deg, #fbf7f0 0%, var(--background) 100%);
   background-attachment: fixed;
 }
 
@@ -37,7 +40,7 @@ body {
   background: transparent;
   color: var(--foreground);
   font-family: var(--font-app-sans);
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 a {

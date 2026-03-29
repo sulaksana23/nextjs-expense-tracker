@@ -574,14 +574,14 @@ export default function DashboardClient({
                   : `Filter ${deferredCategory}`,
               value:
                 deferredCategory === "Semua"
-                  ? `${transactions.length} transaksi`
+                  ? `${clientTransactions.length} transaksi`
                   : `${filteredTransactions.length} transaksi`,
               tone: "text-sky-700",
             },
           ].map((card) => (
             <article
               key={card.label}
-              className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3"
+              className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)]"
             >
               <p className="text-xs uppercase tracking-[0.16em] text-slate-500">{card.label}</p>
               <h2
@@ -594,7 +594,7 @@ export default function DashboardClient({
         </section>
 
         <section className="grid gap-3 lg:grid-cols-[0.92fr_1.08fr]">
-          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5">
+          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
             <div className="space-y-1.5">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="text-base font-semibold text-slate-900">Tambah transaksi</h2>
@@ -787,7 +787,7 @@ export default function DashboardClient({
             </form>
           </article>
 
-          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5">
+          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0">
                 <h2 className="text-base font-semibold">List transaksi</h2>
@@ -825,7 +825,7 @@ export default function DashboardClient({
               </div>
             </div>
 
-            <div className="mt-3 grid gap-2.5 rounded-xl bg-[var(--surface-soft)] p-3">
+            <div className="mt-3 grid gap-2.5 rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
                   Ringkasan filter
@@ -898,7 +898,7 @@ export default function DashboardClient({
                 filteredTransactions.map((transaction) => (
                   <article
                     key={transaction.id}
-                  className="grid gap-3 rounded-xl border border-[var(--border-soft)] bg-white px-3.5 py-3.5 md:grid-cols-[minmax(0,1fr)_auto] md:items-start"
+                  className="grid gap-3 rounded-xl border border-[var(--border-soft)] bg-white px-3.5 py-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-start"
                 >
                     <div className="min-w-0 space-y-1.5">
                       <div className="flex flex-wrap items-center gap-2">
@@ -941,7 +941,7 @@ export default function DashboardClient({
           </article>
         </section>
 
-        <section className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5">
+        <section className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="text-base font-semibold text-slate-900">Chart arus kas</h2>
@@ -956,12 +956,12 @@ export default function DashboardClient({
           </div>
 
           <div className="pt-3">
-            <TransactionsChart transactions={transactions} />
+            <TransactionsChart transactions={clientTransactions} />
           </div>
         </section>
 
         <section className="grid gap-2.5 lg:grid-cols-[0.9fr_1.1fr]">
-          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5">
+          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
             <div className="space-y-1">
               <h2 className="text-base font-semibold text-slate-900">Insight cepat</h2>
               <p className="text-xs leading-5 text-slate-500 sm:text-sm">
@@ -1020,7 +1020,7 @@ export default function DashboardClient({
             </div>
           </article>
 
-          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5">
+          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
             <div className="space-y-1">
               <h2 className="text-base font-semibold text-slate-900">Kategori pengeluaran</h2>
               <p className="text-xs leading-5 text-slate-500 sm:text-sm">
