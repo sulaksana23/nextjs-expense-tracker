@@ -149,7 +149,8 @@ Catatan:
 
 - Jangan gunakan `localhost` untuk deployment Vercel.
 - Script `postinstall` di project ini akan menjalankan `prisma generate` otomatis saat install dependency di build environment.
-- Jika schema database perlu diterapkan ke production, jalankan `prisma migrate deploy` pada environment yang memakai direct URL.
+- Repo ini sudah menyertakan [`vercel.json`](./vercel.json) dengan build command `npm run build:vercel`, jadi Vercel akan otomatis menjalankan `prisma migrate deploy` sebelum `next build`.
+- Build command tersebut membutuhkan direct database URL di `POSTGRES_URL_NON_POOLING` agar migration production bisa diterapkan saat deploy.
 
 ## Struktur Proyek
 
