@@ -69,23 +69,26 @@ sampai menengah.
 
 ## Preview Tampilan
 
-### Login
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <strong>Login</strong><br /><br />
+      <a href="https://your-project-name.vercel.app/">
+        <img src="./public/readme-login.svg" alt="Preview halaman login Expense Tracker" width="100%" />
+      </a>
+    </td>
+    <td width="50%" valign="top">
+      <strong>Register</strong><br /><br />
+      <a href="https://your-project-name.vercel.app/">
+        <img src="./public/readme-register.svg" alt="Preview halaman register Expense Tracker" width="100%" />
+      </a>
+    </td>
+  </tr>
+</table>
 
 <p>
-  <a href="https://your-project-name.vercel.app/">
-    <img src="./public/readme-login.svg" alt="Preview halaman login Expense Tracker" width="100%" />
-  </a>
+  <strong>Dashboard</strong>
 </p>
-
-### Register
-
-<p>
-  <a href="https://your-project-name.vercel.app/">
-    <img src="./public/readme-register.svg" alt="Preview halaman register Expense Tracker" width="100%" />
-  </a>
-</p>
-
-### Dashboard
 
 <p>
   <a href="https://your-project-name.vercel.app/">
