@@ -53,6 +53,18 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+function formatRupiahInput(value: string) {
+  if (!value) {
+    return "";
+  }
+
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(Number(value));
+}
+
 function SubmitButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
 
@@ -72,6 +84,7 @@ export default function DashboardClient({
   transactions,
 }: DashboardClientProps) {
   const [type, setType] = useState<TransactionType>("EXPENSE");
+  const [amountInput, setAmountInput] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const deferredCategory = useDeferredValue(selectedCategory);
   const [transactionState, transactionAction] = useActionState(
@@ -275,12 +288,15 @@ export default function DashboardClient({
               <div className="grid gap-4 xl:grid-cols-2">
                 <label className="grid gap-2 text-sm text-slate-600">
                   <span>Nominal</span>
+                  <input name="amount" type="hidden" value={amountInput} />
                   <input
-                    name="amount"
-                    type="number"
-                    min="0"
-                    step="1000"
-                    placeholder="50000"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="Rp 50.000"
+                    value={formatRupiahInput(amountInput)}
+                    onChange={(event) =>
+                      setAmountInput(event.target.value.replace(/\D/g, ""))
+                    }
                     className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
                     required
                   />
