@@ -8,7 +8,8 @@ import {
   type TransactionState,
 } from "@/app/actions/transactions";
 import type { TransactionType } from "@/app/generated/prisma/enums";
-import TransactionsChart from "@/components/transactions-chart";
+import CategoryBreakdownChart from "@/components/category-breakdown-chart";
+import MonthlyOverviewChart from "@/components/monthly-overview-chart";
 
 type TransactionView = {
   id: string;
@@ -26,16 +27,31 @@ type DashboardClientProps = {
 };
 
 type TransactionTypeFilter = TransactionType | "ALL";
+type SortOption = "newest" | "oldest" | "largest" | "smallest";
 
-const incomeCategories = ["Gaji", "Freelance", "Bonus", "Investasi", "Lainnya"];
-const expenseCategories = [
-  "Makan",
-  "Transport",
-  "Belanja",
-  "Tagihan",
-  "Kesehatan",
-  "Hiburan",
-  "Lainnya",
+type CategoryOption = {
+  icon: string;
+  label: string;
+  type: TransactionType | "BOTH";
+  value: string;
+};
+
+const categoryOptions: CategoryOption[] = [
+  { value: "Food", label: "Food", icon: "🍔", type: "EXPENSE" },
+  { value: "Transport", label: "Transport", icon: "🛵", type: "EXPENSE" },
+  { value: "Shopping", label: "Shopping", icon: "🛍️", type: "EXPENSE" },
+  { value: "Bills", label: "Bills", icon: "💡", type: "EXPENSE" },
+  { value: "Health", label: "Health", icon: "💊", type: "EXPENSE" },
+  { value: "Entertainment", label: "Entertainment", icon: "🎬", type: "EXPENSE" },
+  { value: "Education", label: "Education", icon: "📚", type: "EXPENSE" },
+  { value: "Travel", label: "Travel", icon: "✈️", type: "EXPENSE" },
+  { value: "Salary", label: "Salary", icon: "💼", type: "INCOME" },
+  { value: "Freelance", label: "Freelance", icon: "🧑‍💻", type: "INCOME" },
+  { value: "Bonus", label: "Bonus", icon: "🎁", type: "INCOME" },
+  { value: "Investment", label: "Investment", icon: "📈", type: "INCOME" },
+  { value: "Business", label: "Business", icon: "🏪", type: "INCOME" },
+  { value: "Subscription", label: "Subscription", icon: "🔁", type: "BOTH" },
+  { value: "Other", label: "Other", icon: "🧾", type: "BOTH" },
 ];
 
 const initialTransactionState: TransactionState = {};
@@ -70,11 +86,11 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
-function formatShortDate(value: string) {
+function formatMonthYear(value: Date) {
   return new Intl.DateTimeFormat("id-ID", {
-    day: "2-digit",
-    month: "short",
-  }).format(new Date(value));
+    month: "long",
+    year: "numeric",
+  }).format(value);
 }
 
 function formatRupiahInput(value: string) {
@@ -89,6 +105,56 @@ function formatRupiahInput(value: string) {
   }).format(Number(value));
 }
 
+function normalizeCategory(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function getCategoryMeta(category: string) {
+  const normalized = normalizeCategory(category);
+
+  const exactMatch = categoryOptions.find(
+    (option) => normalizeCategory(option.value) === normalized,
+  );
+
+  if (exactMatch) {
+    return exactMatch;
+  }
+
+  if (
+    ["makan", "kuliner", "food", "restaurant", "resto", "cafe", "kopi"].includes(
+      normalized,
+    )
+  ) {
+    return categoryOptions[0];
+  }
+
+  if (["transport", "gojek", "grab", "parkir", "bensin"].includes(normalized)) {
+    return categoryOptions[1];
+  }
+
+  if (["belanja", "shopping", "store", "mart"].includes(normalized)) {
+    return categoryOptions[2];
+  }
+
+  if (["tagihan", "bills", "listrik", "air", "internet"].includes(normalized)) {
+    return categoryOptions[3];
+  }
+
+  if (["kesehatan", "health", "apotek", "klinik"].includes(normalized)) {
+    return categoryOptions[4];
+  }
+
+  if (["hiburan", "entertainment", "bioskop", "game", "netflix"].includes(normalized)) {
+    return categoryOptions[5];
+  }
+
+  if (["gaji", "salary", "payroll"].includes(normalized)) {
+    return categoryOptions[8];
+  }
+
+  return categoryOptions[categoryOptions.length - 1];
+}
+
 function guessExpenseCategory(title: string) {
   const normalizedTitle = title.toLowerCase();
 
@@ -99,7 +165,7 @@ function guessExpenseCategory(title: string) {
     normalizedTitle.includes("cafe") ||
     normalizedTitle.includes("kopi")
   ) {
-    return "Makan";
+    return "Food";
   }
 
   if (
@@ -117,7 +183,7 @@ function guessExpenseCategory(title: string) {
     normalizedTitle.includes("internet") ||
     normalizedTitle.includes("tagihan")
   ) {
-    return "Tagihan";
+    return "Bills";
   }
 
   if (
@@ -125,7 +191,7 @@ function guessExpenseCategory(title: string) {
     normalizedTitle.includes("klinik") ||
     normalizedTitle.includes("rumah sakit")
   ) {
-    return "Kesehatan";
+    return "Health";
   }
 
   if (
@@ -133,7 +199,7 @@ function guessExpenseCategory(title: string) {
     normalizedTitle.includes("game") ||
     normalizedTitle.includes("netflix")
   ) {
-    return "Hiburan";
+    return "Entertainment";
   }
 
   if (
@@ -142,10 +208,10 @@ function guessExpenseCategory(title: string) {
     normalizedTitle.includes("store") ||
     normalizedTitle.includes("shop")
   ) {
-    return "Belanja";
+    return "Shopping";
   }
 
-  return "Lainnya";
+  return "Other";
 }
 
 function toIsoDateFromIndonesianDate(value: string) {
@@ -211,6 +277,121 @@ function parseReceiptImport(rawValue: string) {
   };
 }
 
+function escapeCsv(value: string) {
+  return `"${value.replaceAll('"', '""')}"`;
+}
+
+function buildCsv(transactions: TransactionView[]) {
+  const rows = [
+    ["Tanggal", "Tipe", "Kategori", "Judul", "Catatan", "Nominal"],
+    ...transactions.map((transaction) => [
+      formatDate(transaction.occurredAt),
+      transaction.type === "INCOME" ? "Income" : "Expense",
+      transaction.category,
+      transaction.title,
+      transaction.note ?? "",
+      String(transaction.amount),
+    ]),
+  ];
+
+  return rows.map((row) => row.map(escapeCsv).join(",")).join("\n");
+}
+
+function buildPdfHtmlReport(
+  userName: string,
+  transactions: TransactionView[],
+  totals: { income: number; expense: number },
+) {
+  const balance = totals.income - totals.expense;
+  const generatedAt = new Intl.DateTimeFormat("id-ID", {
+    dateStyle: "full",
+    timeStyle: "short",
+  }).format(new Date());
+
+  const rows = transactions
+    .map((transaction) => {
+      const sign = transaction.type === "INCOME" ? "+" : "-";
+      return `
+        <tr>
+          <td>${formatDate(transaction.occurredAt)}</td>
+          <td>${transaction.type === "INCOME" ? "Income" : "Expense"}</td>
+          <td>${getCategoryMeta(transaction.category).icon} ${transaction.category}</td>
+          <td>${transaction.title}</td>
+          <td>${transaction.note ?? "-"}</td>
+          <td style="text-align:right;">${sign}${formatCurrency(transaction.amount)}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  return `
+    <!doctype html>
+    <html lang="id">
+      <head>
+        <meta charset="utf-8" />
+        <title>Laporan Expense Tracker</title>
+        <style>
+          body { font-family: Arial, sans-serif; color: #0f172a; padding: 24px; }
+          h1 { margin: 0 0 8px; font-size: 24px; }
+          p { margin: 0 0 8px; color: #475569; }
+          .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
+          .card { border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px; background: #f8fafc; }
+          .label { font-size: 12px; text-transform: uppercase; color: #64748b; margin-bottom: 6px; }
+          .value { font-size: 18px; font-weight: 700; color: #0f172a; }
+          table { width: 100%; border-collapse: collapse; margin-top: 18px; font-size: 12px; }
+          th, td { border: 1px solid #dbe2ea; padding: 8px; vertical-align: top; }
+          th { background: #eff6ff; text-align: left; }
+          @media print { body { padding: 0; } }
+        </style>
+      </head>
+      <body>
+        <h1>Laporan Keuangan ${userName}</h1>
+        <p>Dibuat pada ${generatedAt}</p>
+        <p>Total data diexport: ${transactions.length} transaksi</p>
+        <div class="summary">
+          <div class="card">
+            <div class="label">Total Income</div>
+            <div class="value">${formatCurrency(totals.income)}</div>
+          </div>
+          <div class="card">
+            <div class="label">Total Expense</div>
+            <div class="value">${formatCurrency(totals.expense)}</div>
+          </div>
+          <div class="card">
+            <div class="label">Balance</div>
+            <div class="value">${formatCurrency(balance)}</div>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Tipe</th>
+              <th>Kategori</th>
+              <th>Judul</th>
+              <th>Catatan</th>
+              <th>Nominal</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </body>
+    </html>
+  `;
+}
+
+function downloadFile(content: BlobPart, fileName: string, type: string) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 function SubmitButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
 
@@ -238,10 +419,13 @@ export default function DashboardClient({
   const [occurredAtInput, setOccurredAtInput] = useState(
     new Date().toISOString().slice(0, 10),
   );
-  const [formCategory, setFormCategory] = useState(expenseCategories[0]);
+  const [formCategory, setFormCategory] = useState("Food");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [selectedTypeFilter, setSelectedTypeFilter] =
     useState<TransactionTypeFilter>("ALL");
+  const [selectedSort, setSelectedSort] = useState<SortOption>("newest");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [receiptImportText, setReceiptImportText] = useState("");
   const [receiptImportState, setReceiptImportState] = useState("");
@@ -250,8 +434,14 @@ export default function DashboardClient({
   const [transactionState, setTransactionState] = useState<TransactionState>({});
   const deferredCategory = useDeferredValue(selectedCategory);
   const deferredSearchQuery = useDeferredValue(searchQuery.trim().toLowerCase());
-  const formCategoryOptions =
-    type === "INCOME" ? incomeCategories : expenseCategories;
+
+  const formCategoryOptions = useMemo(
+    () =>
+      categoryOptions.filter(
+        (option) => option.type === "BOTH" || option.type === type,
+      ),
+    [type],
+  );
 
   const categories = useMemo(() => {
     const source = new Set<string>(["Semua"]);
@@ -260,7 +450,17 @@ export default function DashboardClient({
       source.add(transaction.category);
     }
 
-    return Array.from(source);
+    return Array.from(source).sort((left, right) => {
+      if (left === "Semua") {
+        return -1;
+      }
+
+      if (right === "Semua") {
+        return 1;
+      }
+
+      return left.localeCompare(right);
+    });
   }, [clientTransactions]);
 
   const filteredTransactions = useMemo(() => {
@@ -279,6 +479,14 @@ export default function DashboardClient({
         return false;
       }
 
+      if (dateFrom && transaction.occurredAt.slice(0, 10) < dateFrom) {
+        return false;
+      }
+
+      if (dateTo && transaction.occurredAt.slice(0, 10) > dateTo) {
+        return false;
+      }
+
       if (!deferredSearchQuery) {
         return true;
       }
@@ -293,7 +501,40 @@ export default function DashboardClient({
 
       return haystack.includes(deferredSearchQuery);
     });
-  }, [clientTransactions, deferredCategory, deferredSearchQuery, selectedTypeFilter]);
+  }, [
+    clientTransactions,
+    dateFrom,
+    dateTo,
+    deferredCategory,
+    deferredSearchQuery,
+    selectedTypeFilter,
+  ]);
+
+  const sortedTransactions = useMemo(() => {
+    const nextTransactions = [...filteredTransactions];
+
+    nextTransactions.sort((left, right) => {
+      if (selectedSort === "largest") {
+        return right.amount - left.amount;
+      }
+
+      if (selectedSort === "smallest") {
+        return left.amount - right.amount;
+      }
+
+      if (selectedSort === "oldest") {
+        return (
+          new Date(left.occurredAt).getTime() - new Date(right.occurredAt).getTime()
+        );
+      }
+
+      return (
+        new Date(right.occurredAt).getTime() - new Date(left.occurredAt).getTime()
+      );
+    });
+
+    return nextTransactions;
+  }, [filteredTransactions, selectedSort]);
 
   const totals = useMemo(() => {
     return clientTransactions.reduce(
@@ -326,46 +567,21 @@ export default function DashboardClient({
   }, [filteredTransactions]);
 
   const balance = totals.income - totals.expense;
-  const activeCategoryLabel =
-    deferredCategory === "Semua" ? "Semua kategori" : deferredCategory;
-  const activeTypeLabel =
-    selectedTypeFilter === "ALL"
-      ? "Semua tipe"
-      : selectedTypeFilter === "INCOME"
-        ? "Pemasukan"
-        : "Pengeluaran";
 
-  const expenseByCategory = useMemo(() => {
-    const grouped = filteredTransactions.reduce(
-      (accumulator, transaction) => {
-        if (transaction.type !== "EXPENSE") {
-          return accumulator;
-        }
+  const monthlyExpenseAnalytics = useMemo(() => {
+    const now = new Date();
+    const month = now.getMonth();
+    const year = now.getFullYear();
+    const currentMonthExpenses = clientTransactions.filter((transaction) => {
+      if (transaction.type !== "EXPENSE") {
+        return false;
+      }
 
-        accumulator.set(
-          transaction.category,
-          (accumulator.get(transaction.category) ?? 0) + transaction.amount,
-        );
+      const occurredAt = new Date(transaction.occurredAt);
+      return occurredAt.getMonth() === month && occurredAt.getFullYear() === year;
+    });
 
-        return accumulator;
-      },
-      new Map<string, number>(),
-    );
-
-    return Array.from(grouped.entries())
-      .map(([category, amount]) => ({ category, amount }))
-      .sort((left, right) => right.amount - left.amount)
-      .slice(0, 5);
-  }, [filteredTransactions]);
-
-  const highlightMetrics = useMemo(() => {
-    const totalAmount = filteredTransactions.reduce(
-      (sum, transaction) => sum + transaction.amount,
-      0,
-    );
-    const averageAmount =
-      filteredTransactions.length > 0 ? totalAmount / filteredTransactions.length : 0;
-    const largestTransaction = filteredTransactions.reduce<TransactionView | null>(
+    const largestExpense = currentMonthExpenses.reduce<TransactionView | null>(
       (currentLargest, transaction) => {
         if (!currentLargest || transaction.amount > currentLargest.amount) {
           return transaction;
@@ -376,50 +592,79 @@ export default function DashboardClient({
       null,
     );
 
-    const now = new Date();
-    const currentMonthKey = `${now.getFullYear()}-${now.getMonth()}`;
-    let currentMonthIncome = 0;
-    let currentMonthExpense = 0;
-    let recentTransactions = 0;
+    return {
+      label: formatMonthYear(new Date(year, month, 1)),
+      largestExpense,
+    };
+  }, [clientTransactions]);
 
-    for (const transaction of filteredTransactions) {
-      const occurredAt = new Date(transaction.occurredAt);
-      const transactionMonthKey = `${occurredAt.getFullYear()}-${occurredAt.getMonth()}`;
-      const diffInDays =
-        (now.getTime() - occurredAt.getTime()) / (1000 * 60 * 60 * 24);
-
-      if (diffInDays <= 30) {
-        recentTransactions += 1;
+  const categoryAnalytics = useMemo(() => {
+    const grouped = filteredTransactions.reduce((accumulator, transaction) => {
+      if (transaction.type !== "EXPENSE") {
+        return accumulator;
       }
 
-      if (transactionMonthKey === currentMonthKey) {
-        if (transaction.type === "INCOME") {
-          currentMonthIncome += transaction.amount;
-        } else {
-          currentMonthExpense += transaction.amount;
-        }
-      }
-    }
+      accumulator.set(
+        transaction.category,
+        (accumulator.get(transaction.category) ?? 0) + transaction.amount,
+      );
 
-    const savingsRate =
-      currentMonthIncome > 0
-        ? Math.max(
-            0,
-            Math.round(
-              ((currentMonthIncome - currentMonthExpense) / currentMonthIncome) * 100,
-            ),
-          )
-        : 0;
+      return accumulator;
+    }, new Map<string, number>());
+
+    const ordered = Array.from(grouped.entries())
+      .map(([category, amount]) => ({ category, amount }))
+      .sort((left, right) => right.amount - left.amount);
 
     return {
-      averageAmount,
-      currentMonthIncome,
-      currentMonthExpense,
-      largestTransaction,
-      recentTransactions,
-      savingsRate,
+      byCategory: ordered,
+      topCategory: ordered[0] ?? null,
     };
   }, [filteredTransactions]);
+
+  const balanceTrendLabel = filteredTotals.income - filteredTotals.expense;
+  const activeCategoryLabel =
+    deferredCategory === "Semua" ? "Semua kategori" : deferredCategory;
+  const activeTypeLabel =
+    selectedTypeFilter === "ALL"
+      ? "Semua tipe"
+      : selectedTypeFilter === "INCOME"
+        ? "Pemasukan"
+        : "Pengeluaran";
+
+  function resetFormState() {
+    setType("EXPENSE");
+    setAmountInput("");
+    setTitleInput("");
+    setNoteInput("");
+    setOccurredAtInput(new Date().toISOString().slice(0, 10));
+    setFormCategory("Food");
+    setReceiptImportText("");
+    setReceiptImageName("");
+  }
+
+  function handleExportCsv() {
+    const csv = buildCsv(sortedTransactions);
+    downloadFile(csv, "expense-tracker-export.csv", "text/csv;charset=utf-8");
+  }
+
+  function handleExportPdf() {
+    const reportWindow = window.open("", "_blank", "noopener,noreferrer,width=1080,height=820");
+
+    if (!reportWindow) {
+      setReceiptImportState(
+        "Popup untuk export PDF diblokir browser. Izinkan popup lalu coba lagi.",
+      );
+      return;
+    }
+
+    reportWindow.document.write(
+      buildPdfHtmlReport(userName, sortedTransactions, filteredTotals),
+    );
+    reportWindow.document.close();
+    reportWindow.focus();
+    reportWindow.print();
+  }
 
   function handleReceiptImport() {
     const parsedReceipt = parseReceiptImport(receiptImportText);
@@ -504,50 +749,63 @@ export default function DashboardClient({
       ),
     );
 
-    setType("EXPENSE");
-    setAmountInput("");
-    setTitleInput("");
-    setNoteInput("");
-    setOccurredAtInput(new Date().toISOString().slice(0, 10));
-    setFormCategory(expenseCategories[0]);
-    setReceiptImportText("");
+    resetFormState();
     setReceiptImportState("Transaksi berhasil ditambahkan tanpa refresh halaman.");
-    setReceiptImageName("");
     formRef.current?.reset();
   }
 
   return (
     <div className="min-h-screen bg-[var(--background)] px-2.5 py-2.5 text-slate-900 sm:px-3 sm:py-3 md:px-4 md:py-4">
-      <div className="mx-auto grid w-full max-w-6xl gap-2.5">
-        <header className="grid gap-3 rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="space-y-2">
+      <div className="mx-auto grid w-full max-w-7xl gap-2.5">
+        <header className="grid gap-3 rounded-[28px] border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 shadow-[0_18px_50px_rgba(15,23,42,0.06)] lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex w-fit rounded-full bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-700">
-                Dashboard Keuangan
+                Expense Tracker v2
               </span>
               <span className="inline-flex rounded-full border border-[var(--border-soft)] bg-white px-3 py-1 text-[11px] font-medium text-slate-600">
-                Private per akun
+                Data privat per akun
               </span>
             </div>
             <div className="space-y-1">
-              <h1 className="text-lg font-semibold tracking-tight sm:text-xl">
+              <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
                 Halo, {userName}
               </h1>
-              <p className="max-w-2xl text-xs leading-5 text-slate-600 sm:text-sm">
-                Semua pemasukan dan pengeluaran yang tampil di dashboard ini hanya milik
-                akun yang sedang login.
+              <p className="max-w-2xl text-sm leading-6 text-slate-600">
+                Dashboard ini sekarang merangkum saldo, income, expense, analytics,
+                filter, sorting, dan export. Semua transaksi yang tampil hanya milik
+                user yang sedang login.
               </p>
             </div>
           </div>
 
-          <form action={logoutAction} className="flex items-start justify-start lg:justify-end">
-            <button
-              type="submit"
-              className="w-full rounded-xl border border-slate-200 bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 sm:w-auto"
-            >
-              Logout
-            </button>
-          </form>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3">
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+                Snapshot aktif
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <span className="rounded-full bg-white px-3 py-1 text-xs text-slate-600">
+                  {activeCategoryLabel}
+                </span>
+                <span className="rounded-full bg-white px-3 py-1 text-xs text-slate-600">
+                  {activeTypeLabel}
+                </span>
+                <span className="rounded-full bg-white px-3 py-1 text-xs text-slate-600">
+                  Sort: {selectedSort}
+                </span>
+              </div>
+            </div>
+
+            <form action={logoutAction} className="flex items-start justify-start lg:justify-end">
+              <button
+                type="submit"
+                className="w-full rounded-xl border border-slate-200 bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 sm:w-auto"
+              >
+                Logout
+              </button>
+            </form>
+          </div>
         </header>
 
         <section className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
@@ -556,54 +814,145 @@ export default function DashboardClient({
               label: "Total Balance",
               value: formatCurrency(balance),
               tone: balance >= 0 ? "text-emerald-600" : "text-rose-600",
+              subtitle: "Selisih income dan expense seluruh data",
             },
             {
               label: "Total Income",
               value: formatCurrency(totals.income),
               tone: "text-emerald-600",
+              subtitle: "Akumulasi semua pemasukan",
             },
             {
               label: "Total Expense",
               value: formatCurrency(totals.expense),
               tone: "text-rose-600",
+              subtitle: "Akumulasi semua pengeluaran",
             },
             {
-              label:
-                deferredCategory === "Semua"
-                  ? "Total Transaksi"
-                  : `Filter ${deferredCategory}`,
-              value:
-                deferredCategory === "Semua"
-                  ? `${clientTransactions.length} transaksi`
-                  : `${filteredTransactions.length} transaksi`,
+              label: "Filtered Result",
+              value: `${sortedTransactions.length} transaksi`,
               tone: "text-sky-700",
+              subtitle: "Berdasarkan filter tanggal, kategori, tipe, dan search",
             },
           ].map((card) => (
             <article
               key={card.label}
-              className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)]"
+              className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 shadow-[0_10px_30px_rgba(15,23,42,0.05)]"
             >
               <p className="text-xs uppercase tracking-[0.16em] text-slate-500">{card.label}</p>
-              <h2
-                className={`pt-1 text-base font-semibold tracking-tight sm:text-lg ${card.tone}`}
-              >
+              <h2 className={`pt-1 text-lg font-semibold tracking-tight ${card.tone}`}>
                 {card.value}
               </h2>
+              <p className="pt-2 text-xs leading-5 text-slate-500">{card.subtitle}</p>
             </article>
           ))}
         </section>
 
-        <section className="grid gap-3 lg:grid-cols-[0.92fr_1.08fr]">
-          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+        <section className="grid gap-2.5 xl:grid-cols-[1.4fr_0.9fr]">
+          <article className="rounded-[28px] border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="text-base font-semibold text-slate-900">Dashboard arus kas</h2>
+                <p className="pt-1 text-sm leading-6 text-slate-500">
+                  Grafik bulanan untuk memantau income, expense, dan balance dalam 6
+                  periode terbaru.
+                </p>
+              </div>
+              <span className="inline-flex w-fit rounded-full border border-[var(--border-soft)] bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                Recharts
+              </span>
+            </div>
+
+            <div className="pt-4">
+              <MonthlyOverviewChart transactions={clientTransactions} />
+            </div>
+          </article>
+
+          <article className="rounded-[28px] border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+            <div className="space-y-1">
+              <h2 className="text-base font-semibold text-slate-900">Analytics cepat</h2>
+              <p className="text-sm leading-6 text-slate-500">
+                Insight otomatis untuk membantu baca pola pengeluaran lebih cepat.
+              </p>
+            </div>
+
+            <div className="mt-4 grid gap-2.5">
+              <article className="rounded-2xl border border-rose-100 bg-rose-50/80 p-3">
+                <p className="text-xs uppercase tracking-[0.18em] text-rose-500">
+                  Pengeluaran terbesar bulan ini
+                </p>
+                {monthlyExpenseAnalytics.largestExpense ? (
+                  <>
+                    <p className="pt-2 text-base font-semibold text-slate-900">
+                      {monthlyExpenseAnalytics.largestExpense.title}
+                    </p>
+                    <p className="pt-1 text-sm text-slate-600">
+                      {getCategoryMeta(monthlyExpenseAnalytics.largestExpense.category).icon}{" "}
+                      {monthlyExpenseAnalytics.largestExpense.category} •{" "}
+                      {monthlyExpenseAnalytics.label}
+                    </p>
+                    <p className="pt-2 text-lg font-semibold text-rose-600">
+                      {formatCurrency(monthlyExpenseAnalytics.largestExpense.amount)}
+                    </p>
+                  </>
+                ) : (
+                  <p className="pt-2 text-sm text-slate-600">
+                    Belum ada data pengeluaran pada {monthlyExpenseAnalytics.label}.
+                  </p>
+                )}
+              </article>
+
+              <article className="rounded-2xl border border-amber-100 bg-amber-50/80 p-3">
+                <p className="text-xs uppercase tracking-[0.18em] text-amber-600">
+                  Kategori paling boros
+                </p>
+                {categoryAnalytics.topCategory ? (
+                  <>
+                    <p className="pt-2 text-base font-semibold text-slate-900">
+                      {getCategoryMeta(categoryAnalytics.topCategory.category).icon}{" "}
+                      {categoryAnalytics.topCategory.category}
+                    </p>
+                    <p className="pt-1 text-sm text-slate-600">
+                      Diambil dari data yang sedang terfilter.
+                    </p>
+                    <p className="pt-2 text-lg font-semibold text-amber-700">
+                      {formatCurrency(categoryAnalytics.topCategory.amount)}
+                    </p>
+                  </>
+                ) : (
+                  <p className="pt-2 text-sm text-slate-600">
+                    Belum ada pengeluaran untuk dihitung.
+                  </p>
+                )}
+              </article>
+
+              <article className="rounded-2xl border border-emerald-100 bg-emerald-50/80 p-3">
+                <p className="text-xs uppercase tracking-[0.18em] text-emerald-600">
+                  Balance aktif
+                </p>
+                <p className="pt-2 text-base font-semibold text-slate-900">
+                  {formatCurrency(balanceTrendLabel)}
+                </p>
+                <p className="pt-1 text-sm text-slate-600">
+                  Berdasarkan data yang sedang ditampilkan di dashboard.
+                </p>
+              </article>
+            </div>
+          </article>
+        </section>
+
+        <section className="grid gap-2.5 xl:grid-cols-[0.95fr_1.05fr]">
+          <article className="rounded-[28px] border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
             <div className="space-y-1.5">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="text-base font-semibold text-slate-900">Tambah transaksi</h2>
                 <span className="rounded-full border border-[var(--border-soft)] bg-[var(--surface-soft)] px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-slate-500">
-                  Akun sendiri
+                  Multi-user ready
                 </span>
               </div>
-              <p className="text-xs leading-5 text-slate-600 sm:text-sm">
-                Gunakan form ini untuk menambah income atau expense ke akun kamu.
+              <p className="text-sm leading-6 text-slate-600">
+                Input pemasukan dan pengeluaran dengan kategori yang lebih rapi, plus
+                helper OCR untuk detail transaksi dari screenshot.
               </p>
             </div>
 
@@ -613,21 +962,20 @@ export default function DashboardClient({
               </div>
             ) : null}
 
-            <form ref={formRef} action={handleCreateTransaction} className="grid gap-2.5 pt-3">
-              <div className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3">
+            <form ref={formRef} action={handleCreateTransaction} className="grid gap-2.5 pt-4">
+              <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3">
                 <div className="space-y-1">
                   <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-900">
                     Import dari detail transaksi
                   </h3>
-                  <p className="text-xs leading-5 text-slate-500 sm:text-sm">
-                    Tempel teks hasil copy atau OCR dari screenshot QRIS/banking seperti
-                    rincian merchant, jumlah, dan waktu transaksi. Form akan otomatis
-                    diarahkan ke pengeluaran.
+                  <p className="text-sm leading-6 text-slate-500">
+                    Tempel teks hasil copy atau OCR dari screenshot QRIS atau mobile
+                    banking untuk isi form lebih cepat.
                   </p>
                 </div>
 
                 <div className="grid gap-2.5 pt-3">
-                  <label className="grid gap-1.5 text-xs text-slate-600 sm:text-sm">
+                  <label className="grid gap-1.5 text-sm text-slate-600">
                     <span>Upload screenshot dari perangkat</span>
                     <input
                       type="file"
@@ -635,10 +983,6 @@ export default function DashboardClient({
                       onChange={handleReceiptImageChange}
                       className="block w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm text-slate-900 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-slate-700"
                     />
-                    <p className="text-xs leading-5 text-slate-500">
-                      Pilih gambar dari sistem, lalu app akan mencoba membaca teks
-                      merchant, nominal, dan waktu transaksi otomatis.
-                    </p>
                     {receiptImageName ? (
                       <p className="text-xs font-medium text-slate-600">
                         File dipilih: {receiptImageName}
@@ -674,7 +1018,7 @@ export default function DashboardClient({
               </div>
 
               <div className="grid gap-1.5">
-                <span className="text-xs text-slate-600 sm:text-sm">Tipe transaksi</span>
+                <span className="text-sm text-slate-600">Tipe transaksi</span>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {[
                     { label: "Pengeluaran", value: "EXPENSE" as const },
@@ -682,7 +1026,7 @@ export default function DashboardClient({
                   ].map((option) => (
                     <label
                       key={option.value}
-                      className={`rounded-xl border px-4 py-2 text-center text-xs font-medium transition sm:text-sm ${
+                      className={`rounded-xl border px-4 py-2 text-center text-sm font-medium transition ${
                         type === option.value
                           ? "border-slate-900 bg-slate-900 text-white"
                           : "border-[var(--border-soft)] bg-[var(--surface-soft)] text-slate-600 hover:border-slate-300"
@@ -695,13 +1039,15 @@ export default function DashboardClient({
                         checked={type === option.value}
                         onChange={() => {
                           setType(option.value);
-                          const nextCategoryOptions =
-                            option.value === "INCOME"
-                              ? incomeCategories
-                              : expenseCategories;
+                          const nextDefaultCategory =
+                            option.value === "INCOME" ? "Salary" : "Food";
 
-                          if (!nextCategoryOptions.includes(formCategory)) {
-                            setFormCategory(nextCategoryOptions[0]);
+                          if (
+                            !formCategoryOptions.some(
+                              (categoryOption) => categoryOption.value === formCategory,
+                            )
+                          ) {
+                            setFormCategory(nextDefaultCategory);
                           }
                         }}
                         className="sr-only"
@@ -712,7 +1058,7 @@ export default function DashboardClient({
                 </div>
               </div>
 
-              <label className="grid gap-1.5 text-xs text-slate-600 sm:text-sm">
+              <label className="grid gap-1.5 text-sm text-slate-600">
                 <span>Judul transaksi</span>
                 <input
                   name="title"
@@ -720,85 +1066,115 @@ export default function DashboardClient({
                   onChange={(event) => setTitleInput(event.target.value)}
                   placeholder={type === "INCOME" ? "Gaji bulanan" : "Makan siang"}
                   className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
-                  required
                 />
               </label>
 
-              <div className="grid gap-3 xl:grid-cols-2">
-                <label className="grid gap-1.5 text-xs text-slate-600 sm:text-sm">
+              <div className="grid gap-2.5 sm:grid-cols-2">
+                <label className="grid gap-1.5 text-sm text-slate-600">
                   <span>Nominal</span>
-                  <input name="amount" type="hidden" value={amountInput} />
                   <input
-                    type="text"
+                    name="amount"
                     inputMode="numeric"
-                    placeholder="Rp 50.000"
-                    value={formatRupiahInput(amountInput)}
+                    value={amountInput}
                     onChange={(event) =>
-                      setAmountInput(event.target.value.replace(/\D/g, ""))
+                      setAmountInput(event.target.value.replace(/[^\d]/g, ""))
                     }
+                    placeholder="50000"
                     className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
-                    required
                   />
+                  <span className="text-xs text-slate-500">
+                    {amountInput ? formatRupiahInput(amountInput) : "Masukkan nominal transaksi"}
+                  </span>
                 </label>
 
-                <label className="grid gap-1.5 text-xs text-slate-600 sm:text-sm">
-                  <span>Tanggal</span>
+                <label className="grid gap-1.5 text-sm text-slate-600">
+                  <span>Tanggal transaksi</span>
                   <input
                     name="occurredAt"
                     type="date"
                     value={occurredAtInput}
                     onChange={(event) => setOccurredAtInput(event.target.value)}
                     className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm text-slate-900 outline-none focus:border-slate-400"
-                    required
                   />
                 </label>
               </div>
 
-              <div className="grid gap-3 xl:grid-cols-2">
-                <label className="grid gap-1.5 text-xs text-slate-600 sm:text-sm">
-                  <span>Kategori</span>
-                  <select
-                    name="category"
-                    value={formCategory}
-                    onChange={(event) => setFormCategory(event.target.value)}
-                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm text-slate-900 outline-none focus:border-slate-400"
-                  >
-                    {formCategoryOptions.map((option) => (
-                      <option key={option} value={option} className="text-slate-900">
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+              <label className="grid gap-1.5 text-sm text-slate-600">
+                <span>Kategori transaksi</span>
+                <select
+                  name="category"
+                  value={formCategory}
+                  onChange={(event) => setFormCategory(event.target.value)}
+                  className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm text-slate-900 outline-none focus:border-slate-400"
+                >
+                  {formCategoryOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.icon} {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-                <label className="grid gap-1.5 text-xs text-slate-600 sm:text-sm">
-                  <span>Catatan</span>
-                  <input
-                    name="note"
-                    value={noteInput}
-                    onChange={(event) => setNoteInput(event.target.value)}
-                    placeholder="Opsional"
-                    className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
-                  />
-                </label>
+              <label className="grid gap-1.5 text-sm text-slate-600">
+                <span>Catatan</span>
+                <textarea
+                  name="note"
+                  value={noteInput}
+                  onChange={(event) => setNoteInput(event.target.value)}
+                  rows={3}
+                  placeholder="Contoh: makan bareng tim, invoice bulan Maret, atau langganan rutin"
+                  className="rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400"
+                />
+              </label>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <SubmitButton label="Simpan transaksi" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetFormState();
+                    setReceiptImportState("");
+                    formRef.current?.reset();
+                  }}
+                  className="inline-flex items-center justify-center rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300"
+                >
+                  Reset form
+                </button>
               </div>
-
-              <SubmitButton label="Simpan transaksi" />
             </form>
           </article>
 
-          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-              <div className="min-w-0">
-                <h2 className="text-base font-semibold">List transaksi</h2>
-                <p className="pt-1 text-xs leading-5 text-slate-500 sm:text-sm">
-                  Hanya transaksi milik akun ini yang ditampilkan. Filter kategori
-                  membantu review arus kas jadi lebih cepat.
-                </p>
+          <article className="rounded-[28px] border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h2 className="text-base font-semibold">Filter, sorting, dan export</h2>
+                  <p className="pt-1 text-sm leading-6 text-slate-500">
+                    Kombinasikan filter tanggal, kategori, tipe, pencarian, dan urutan
+                    untuk membaca data lebih presisi.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={handleExportCsv}
+                    className="rounded-xl border border-[var(--border-soft)] bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300"
+                  >
+                    Export CSV
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExportPdf}
+                    className="rounded-xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                  >
+                    Export PDF
+                  </button>
+                </div>
               </div>
 
-              <div className="grid w-full gap-2.5 lg:w-auto lg:min-w-72">
-                <label className="grid gap-1.5 text-xs text-slate-500 sm:text-sm">
+              <div className="grid gap-2.5 md:grid-cols-2 xl:grid-cols-3">
+                <label className="grid gap-1.5 text-sm text-slate-500">
                   <span>Cari transaksi</span>
                   <input
                     value={searchQuery}
@@ -808,79 +1184,103 @@ export default function DashboardClient({
                   />
                 </label>
 
-                <label className="grid gap-1.5 text-xs text-slate-500 sm:text-sm">
+                <label className="grid gap-1.5 text-sm text-slate-500">
                   <span>Filter kategori</span>
                   <select
                     value={selectedCategory}
                     onChange={(event) => setSelectedCategory(event.target.value)}
                     className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm text-slate-900 outline-none focus:border-slate-400"
                   >
-                    {categories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
+                    {categories.map((category) => {
+                      const meta = getCategoryMeta(category);
+                      return (
+                        <option key={category} value={category}>
+                          {category === "Semua" ? category : `${meta.icon} ${category}`}
+                        </option>
+                      );
+                    })}
                   </select>
                 </label>
-              </div>
-            </div>
 
-            <div className="mt-3 grid gap-2.5 rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
-                  Ringkasan filter
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <span className="rounded-full border border-[var(--border-soft)] bg-white px-3 py-1 text-xs text-slate-600">
-                    {activeCategoryLabel}
-                  </span>
-                  <span className="rounded-full border border-[var(--border-soft)] bg-white px-3 py-1 text-xs text-slate-600">
-                    {activeTypeLabel}
-                  </span>
+                <label className="grid gap-1.5 text-sm text-slate-500">
+                  <span>Sorting</span>
+                  <select
+                    value={selectedSort}
+                    onChange={(event) => setSelectedSort(event.target.value as SortOption)}
+                    className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm text-slate-900 outline-none focus:border-slate-400"
+                  >
+                    <option value="newest">Terbaru</option>
+                    <option value="oldest">Terlama</option>
+                    <option value="largest">Nominal terbesar</option>
+                    <option value="smallest">Nominal terkecil</option>
+                  </select>
+                </label>
+
+                <label className="grid gap-1.5 text-sm text-slate-500">
+                  <span>Dari tanggal</span>
+                  <input
+                    type="date"
+                    value={dateFrom}
+                    onChange={(event) => setDateFrom(event.target.value)}
+                    className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm text-slate-900 outline-none focus:border-slate-400"
+                  />
+                </label>
+
+                <label className="grid gap-1.5 text-sm text-slate-500">
+                  <span>Sampai tanggal</span>
+                  <input
+                    type="date"
+                    value={dateTo}
+                    onChange={(event) => setDateTo(event.target.value)}
+                    className="w-full rounded-xl border border-[var(--border-soft)] bg-white px-4 py-2 text-sm text-slate-900 outline-none focus:border-slate-400"
+                  />
+                </label>
+
+                <div className="grid gap-1.5 text-sm text-slate-500">
+                  <span>Tipe transaksi</span>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { label: "Semua", value: "ALL" as const },
+                      { label: "Pemasukan", value: "INCOME" as const },
+                      { label: "Pengeluaran", value: "EXPENSE" as const },
+                    ].map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => setSelectedTypeFilter(option.value)}
+                        className={`rounded-full px-3 py-2 text-xs font-semibold transition ${
+                          selectedTypeFilter === option.value
+                            ? "bg-slate-900 text-white"
+                            : "border border-[var(--border-soft)] bg-white text-slate-600 hover:border-slate-300"
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { label: "Semua", value: "ALL" as const },
-                  { label: "Pemasukan", value: "INCOME" as const },
-                  { label: "Pengeluaran", value: "EXPENSE" as const },
-                ].map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => setSelectedTypeFilter(option.value)}
-                    className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
-                      selectedTypeFilter === option.value
-                        ? "bg-slate-900 text-white"
-                        : "border border-[var(--border-soft)] bg-white text-slate-600 hover:border-slate-300"
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-                <div className="rounded-xl border border-[var(--border-soft)] bg-white px-3.5 py-3">
+              <div className="grid gap-2.5 sm:grid-cols-3">
+                <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-3.5 py-3">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
-                    Income Filtered
+                    Income filtered
                   </p>
                   <p className="pt-1 text-sm font-semibold text-emerald-600 sm:text-base">
                     {formatCurrency(filteredTotals.income)}
                   </p>
                 </div>
-                <div className="rounded-xl border border-[var(--border-soft)] bg-white px-3.5 py-3">
+                <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-3.5 py-3">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
-                    Expense Filtered
+                    Expense filtered
                   </p>
                   <p className="pt-1 text-sm font-semibold text-rose-600 sm:text-base">
                     {formatCurrency(filteredTotals.expense)}
                   </p>
                 </div>
-                <div className="rounded-xl border border-[var(--border-soft)] bg-white px-3.5 py-3">
+                <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-soft)] px-3.5 py-3">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
-                    Balance Filtered
+                    Balance filtered
                   </p>
                   <p className="pt-1 text-sm font-semibold text-slate-900 sm:text-base">
                     {formatCurrency(filteredTotals.income - filteredTotals.expense)}
@@ -888,185 +1288,103 @@ export default function DashboardClient({
                 </div>
               </div>
             </div>
-
-            <div className="mt-3 grid gap-2.5">
-              {filteredTransactions.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center text-sm text-slate-500">
-                  Belum ada transaksi untuk kategori ini.
-                </div>
-              ) : (
-                filteredTransactions.map((transaction) => (
-                  <article
-                    key={transaction.id}
-                  className="grid gap-3 rounded-xl border border-[var(--border-soft)] bg-white px-3.5 py-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-start"
-                >
-                    <div className="min-w-0 space-y-1.5">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="break-words text-sm font-semibold text-slate-900 sm:text-base">
-                          {transaction.title}
-                        </h3>
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
-                            transaction.type === "INCOME"
-                              ? "bg-emerald-100 text-emerald-700"
-                              : "bg-rose-100 text-rose-700"
-                          }`}
-                        >
-                          {transaction.type === "INCOME" ? "Income" : "Expense"}
-                        </span>
-                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                          {transaction.category}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 sm:text-sm">
-                        <span>{formatDate(transaction.occurredAt)}</span>
-                        {transaction.note ? <span>{transaction.note}</span> : null}
-                      </div>
-                    </div>
-
-                    <div
-                      className={`text-left text-sm font-semibold tracking-tight sm:text-base md:text-right ${
-                        transaction.type === "INCOME"
-                          ? "text-emerald-600"
-                          : "text-rose-600"
-                      }`}
-                    >
-                      {transaction.type === "INCOME" ? "+" : "-"}
-                      {formatCurrency(transaction.amount)}
-                    </div>
-                  </article>
-                ))
-              )}
-            </div>
           </article>
         </section>
 
-        <section className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="text-base font-semibold text-slate-900">Chart arus kas</h2>
-              <p className="pt-1 text-xs leading-5 text-slate-500 sm:text-sm">
-                Perbandingan pemasukan, pengeluaran, dan balance per bulan untuk 6
-                periode terbaru.
-              </p>
-            </div>
-            <span className="inline-flex w-fit rounded-full border border-[var(--border-soft)] bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-              Chart.js
-            </span>
-          </div>
-
-          <div className="pt-3">
-            <TransactionsChart transactions={clientTransactions} />
-          </div>
-        </section>
-
-        <section className="grid gap-2.5 lg:grid-cols-[0.9fr_1.1fr]">
-          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-            <div className="space-y-1">
-              <h2 className="text-base font-semibold text-slate-900">Insight cepat</h2>
-              <p className="text-xs leading-5 text-slate-500 sm:text-sm">
-                Ringkasan otomatis dari transaksi yang sedang tampil di dashboard.
-              </p>
+        <section className="grid gap-2.5 xl:grid-cols-[0.95fr_1.05fr]">
+          <article className="rounded-[28px] border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="text-base font-semibold text-slate-900">Grafik per kategori</h2>
+                <p className="pt-1 text-sm leading-6 text-slate-500">
+                  Breakdown pengeluaran berdasarkan kategori dari data yang sedang
+                  terfilter.
+                </p>
+              </div>
+              <span className="text-xs text-slate-500">
+                Top {Math.min(categoryAnalytics.byCategory.length, 6)} kategori
+              </span>
             </div>
 
-            <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
-              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Rata-rata transaksi
-                </p>
-                <p className="pt-1 text-sm font-semibold text-slate-900 sm:text-base">
-                  {formatCurrency(highlightMetrics.averageAmount)}
-                </p>
-              </article>
-
-              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Aktivitas 30 hari
-                </p>
-                <p className="pt-1 text-sm font-semibold text-slate-900 sm:text-base">
-                  {highlightMetrics.recentTransactions} transaksi
-                </p>
-              </article>
-
-              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Saving rate bulan ini
-                </p>
-                <p className="pt-1 text-sm font-semibold text-emerald-600 sm:text-base">
-                  {highlightMetrics.savingsRate}%
-                </p>
-                <p className="pt-1 text-sm text-slate-500">
-                  Income {formatCurrency(highlightMetrics.currentMonthIncome)}
-                </p>
-              </article>
-
-              <article className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Transaksi terbesar
-                </p>
-                <p className="pt-1 text-sm font-semibold text-slate-900 sm:text-base">
-                  {highlightMetrics.largestTransaction
-                    ? formatCurrency(highlightMetrics.largestTransaction.amount)
-                    : "Belum ada data"}
-                </p>
-                <p className="pt-1 text-sm text-slate-500">
-                  {highlightMetrics.largestTransaction
-                    ? `${highlightMetrics.largestTransaction.title} • ${formatShortDate(
-                        highlightMetrics.largestTransaction.occurredAt,
-                      )}`
-                    : "Tambahkan transaksi pertama untuk melihat insight ini."}
-                </p>
-              </article>
+            <div className="pt-4">
+              <CategoryBreakdownChart items={categoryAnalytics.byCategory} />
             </div>
           </article>
 
-          <article className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-card)] p-3 sm:p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-            <div className="space-y-1">
-              <h2 className="text-base font-semibold text-slate-900">Kategori pengeluaran</h2>
-              <p className="text-xs leading-5 text-slate-500 sm:text-sm">
-                Kategori paling dominan dari transaksi yang sedang difilter.
-              </p>
+          <article className="rounded-[28px] border border-[var(--border-soft)] bg-[var(--surface-card)] p-4 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-base font-semibold">List transaksi</h2>
+                <p className="pt-1 text-sm leading-6 text-slate-500">
+                  Tampilan transaksi sekarang mendukung kategori, icon, filter tanggal,
+                  dan sorting yang lebih fleksibel.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCategory("Semua");
+                  setSelectedTypeFilter("ALL");
+                  setSelectedSort("newest");
+                  setDateFrom("");
+                  setDateTo("");
+                  setSearchQuery("");
+                }}
+                className="rounded-xl border border-[var(--border-soft)] bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300"
+              >
+                Reset filter
+              </button>
             </div>
 
-            <div className="mt-3 grid gap-2.5">
-              {expenseByCategory.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center text-sm text-slate-500">
-                  Belum ada pengeluaran pada filter ini.
+            <div className="mt-4 grid gap-2.5">
+              {sortedTransactions.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center text-sm text-slate-500">
+                  Belum ada transaksi untuk kombinasi filter ini.
                 </div>
               ) : (
-                expenseByCategory.map((item, index) => {
-                  const maxAmount = expenseByCategory[0]?.amount ?? 1;
-                  const widthPercentage = Math.max(
-                    18,
-                    Math.round((item.amount / maxAmount) * 100),
-                  );
+                sortedTransactions.map((transaction) => {
+                  const categoryMeta = getCategoryMeta(transaction.category);
 
                   return (
-                    <div
-                      key={item.category}
-                      className="rounded-xl border border-[var(--border-soft)] bg-[var(--surface-soft)] p-3"
+                    <article
+                      key={transaction.id}
+                      className="grid gap-3 rounded-2xl border border-[var(--border-soft)] bg-white px-4 py-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-start"
                     >
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="text-xs font-semibold text-slate-900 sm:text-sm">
-                            {index + 1}. {item.category}
-                          </p>
-                          <p className="pt-1 text-xs text-slate-500 sm:text-sm">
-                            {formatCurrency(item.amount)}
-                          </p>
+                      <div className="min-w-0 space-y-1.5">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="break-words text-sm font-semibold text-slate-900 sm:text-base">
+                            {transaction.title}
+                          </h3>
+                          <span
+                            className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
+                              transaction.type === "INCOME"
+                                ? "bg-emerald-100 text-emerald-700"
+                                : "bg-rose-100 text-rose-700"
+                            }`}
+                          >
+                            {transaction.type === "INCOME" ? "Income" : "Expense"}
+                          </span>
+                          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                            {categoryMeta.icon} {transaction.category}
+                          </span>
                         </div>
-                        <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600">
-                          Dominan
-                        </span>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 sm:text-sm">
+                          <span>{formatDate(transaction.occurredAt)}</span>
+                          {transaction.note ? <span>{transaction.note}</span> : null}
+                        </div>
                       </div>
 
-                      <div className="mt-3 h-2 overflow-hidden rounded-full bg-white">
-                        <div
-                          className="h-full rounded-full bg-rose-500"
-                          style={{ width: `${widthPercentage}%` }}
-                        />
+                      <div
+                        className={`text-left text-sm font-semibold tracking-tight sm:text-base md:text-right ${
+                          transaction.type === "INCOME"
+                            ? "text-emerald-600"
+                            : "text-rose-600"
+                        }`}
+                      >
+                        {transaction.type === "INCOME" ? "+" : "-"}
+                        {formatCurrency(transaction.amount)}
                       </div>
-                    </div>
+                    </article>
                   );
                 })
               )}
