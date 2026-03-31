@@ -9,6 +9,7 @@ import {
 import type { TransactionType } from "@/app/generated/prisma/enums";
 import CategoryBreakdownChart from "@/components/category-breakdown-chart";
 import MonthlyOverviewChart from "@/components/monthly-overview-chart";
+import { CATEGORY_OPTIONS, resolveCategoryConfig } from "@/lib/category";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -32,42 +33,16 @@ type SortOption = "newest" | "oldest" | "largest" | "smallest";
 
 type CategoryOption = {
   icon: string;
-  label: string;
+  name: string;
+  slug: string;
   type: TransactionType | "BOTH";
-  value: string;
 };
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const CATEGORY_OPTIONS: CategoryOption[] = [
-  { value: "Food",          label: "Food",          icon: "🍔", type: "EXPENSE" },
-  { value: "Transport",     label: "Transport",     icon: "🛵", type: "EXPENSE" },
-  { value: "Shopping",      label: "Shopping",      icon: "🛍️", type: "EXPENSE" },
-  { value: "Bills",         label: "Bills",         icon: "💡", type: "EXPENSE" },
-  { value: "Health",        label: "Health",        icon: "💊", type: "EXPENSE" },
-  { value: "Entertainment", label: "Entertainment", icon: "🎬", type: "EXPENSE" },
-  { value: "Education",     label: "Education",     icon: "📚", type: "EXPENSE" },
-  { value: "Travel",        label: "Travel",        icon: "✈️", type: "EXPENSE" },
-  { value: "Salary",        label: "Salary",        icon: "💼", type: "INCOME"  },
-  { value: "Freelance",     label: "Freelance",     icon: "🧑‍💻", type: "INCOME"  },
-  { value: "Bonus",         label: "Bonus",         icon: "🎁", type: "INCOME"  },
-  { value: "Investment",    label: "Investment",    icon: "📈", type: "INCOME"  },
-  { value: "Business",      label: "Business",      icon: "🏪", type: "INCOME"  },
-  { value: "Subscription",  label: "Subscription",  icon: "🔁", type: "BOTH"    },
-  { value: "Other",         label: "Other",         icon: "🧾", type: "BOTH"    },
-];
-
-// Pre-built lookup map — O(1) instead of O(n) find on every render
-const CATEGORY_MAP = new Map(
-  CATEGORY_OPTIONS.map((o) => [o.value.toLowerCase(), o])
-);
 
 const MONTH_MAP = new Map([
   ["jan","01"],["feb","02"],["mar","03"],["apr","04"],["mei","05"],["jun","06"],
   ["jul","07"],["agu","08"],["sep","09"],["okt","10"],["nov","11"],["des","12"],
 ]);
 
-const FALLBACK_CATEGORY = CATEGORY_OPTIONS[CATEGORY_OPTIONS.length - 1]!;
 const INITIAL_TX_STATE: TransactionState = {};
 
 // ─── Pure utilities ───────────────────────────────────────────────────────────
@@ -82,19 +57,7 @@ const fmtMonthYear = (v: Date) =>
   new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(v);
 
 function getCategoryMeta(category: string): CategoryOption {
-  const key = category.trim().toLowerCase();
-  if (CATEGORY_MAP.has(key)) return CATEGORY_MAP.get(key)!;
-  // Alias fallbacks
-  const aliases: Record<string, CategoryOption> = {
-    makan: CATEGORY_OPTIONS[0]!, kuliner: CATEGORY_OPTIONS[0]!, restaurant: CATEGORY_OPTIONS[0]!, resto: CATEGORY_OPTIONS[0]!, cafe: CATEGORY_OPTIONS[0]!, kopi: CATEGORY_OPTIONS[0]!,
-    gojek: CATEGORY_OPTIONS[1]!, grab: CATEGORY_OPTIONS[1]!, parkir: CATEGORY_OPTIONS[1]!, bensin: CATEGORY_OPTIONS[1]!,
-    belanja: CATEGORY_OPTIONS[2]!, store: CATEGORY_OPTIONS[2]!, mart: CATEGORY_OPTIONS[2]!,
-    tagihan: CATEGORY_OPTIONS[3]!, listrik: CATEGORY_OPTIONS[3]!, air: CATEGORY_OPTIONS[3]!, internet: CATEGORY_OPTIONS[3]!,
-    kesehatan: CATEGORY_OPTIONS[4]!, apotek: CATEGORY_OPTIONS[4]!, klinik: CATEGORY_OPTIONS[4]!,
-    hiburan: CATEGORY_OPTIONS[5]!, bioskop: CATEGORY_OPTIONS[5]!, game: CATEGORY_OPTIONS[5]!, netflix: CATEGORY_OPTIONS[5]!,
-    gaji: CATEGORY_OPTIONS[8]!, salary: CATEGORY_OPTIONS[8]!, payroll: CATEGORY_OPTIONS[8]!,
-  };
-  return aliases[key] ?? FALLBACK_CATEGORY;
+  return resolveCategoryConfig(category);
 }
 
 function guessCategory(title: string): string {
@@ -241,7 +204,7 @@ export default function DashboardClient({ userName, transactions }: DashboardCli
   // ── Derived data ─────────────────────────────────────────────────────────────
 
   const formCategoryOptions = useMemo(
-    () => CATEGORY_OPTIONS.filter((o) => o.type === "BOTH" || o.type === type),
+    () => CATEGORY_OPTIONS.filter((option) => option.type === "BOTH" || option.type === type),
     [type]
   );
 
@@ -272,12 +235,26 @@ export default function DashboardClient({ userName, transactions }: DashboardCli
   }, [filteredTxs, sort]);
 
   const totals = useMemo(() => clientTxs.reduce(
-    (acc, t) => { t.type === "INCOME" ? (acc.income += t.amount) : (acc.expense += t.amount); return acc; },
+    (acc, t) => {
+      if (t.type === "INCOME") {
+        acc.income += t.amount;
+      } else {
+        acc.expense += t.amount;
+      }
+      return acc;
+    },
     { income: 0, expense: 0 }
   ), [clientTxs]);
 
   const filteredTotals = useMemo(() => filteredTxs.reduce(
-    (acc, t) => { t.type === "INCOME" ? (acc.income += t.amount) : (acc.expense += t.amount); return acc; },
+    (acc, t) => {
+      if (t.type === "INCOME") {
+        acc.income += t.amount;
+      } else {
+        acc.expense += t.amount;
+      }
+      return acc;
+    },
     { income: 0, expense: 0 }
   ), [filteredTxs]);
 
@@ -488,7 +465,13 @@ export default function DashboardClient({ userName, transactions }: DashboardCli
                 {(["EXPENSE", "INCOME"] as const).map((v) => (
                   <label key={v} className={`cursor-pointer rounded-lg py-1.5 text-center text-xs font-semibold transition-all ${type === v ? "bg-slate-900 text-white shadow-sm" : "text-slate-500 hover:text-slate-700"}`}>
                     <input type="radio" name="type" value={v} checked={type === v}
-                      onChange={() => { setType(v); if (!formCategoryOptions.some((o) => o.value === category)) setCategory(v === "INCOME" ? "Salary" : "Food"); }}
+                      onChange={() => {
+                        const nextOptions = CATEGORY_OPTIONS.filter((option) => option.type === "BOTH" || option.type === v);
+                        setType(v);
+                        if (!nextOptions.some((option) => option.name === category)) {
+                          setCategory(v === "INCOME" ? "Salary" : "Food");
+                        }
+                      }}
                       className="sr-only" />
                     {v === "EXPENSE" ? "Pengeluaran" : "Pemasukan"}
                   </label>
@@ -515,8 +498,8 @@ export default function DashboardClient({ userName, transactions }: DashboardCli
               <div className="grid grid-cols-2 gap-2">
                 <Field label="Kategori">
                   <select name="category" value={category} onChange={(e) => setCategory(e.target.value)} className={selectCls}>
-                    {formCategoryOptions.map((o) => (
-                      <option key={o.value} value={o.value}>{o.icon} {o.label}</option>
+                    {formCategoryOptions.map((option) => (
+                      <option key={option.slug} value={option.name}>{option.icon} {option.name}</option>
                     ))}
                   </select>
                 </Field>

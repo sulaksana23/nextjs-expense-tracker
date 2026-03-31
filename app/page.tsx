@@ -13,7 +13,9 @@ export default async function Home() {
     | {
         id: string;
         title: string;
-        category: string;
+        category: {
+          name: string;
+        };
         note: string | null;
         amount: unknown;
         type: "INCOME" | "EXPENSE";
@@ -37,11 +39,15 @@ export default async function Home() {
         select: {
           id: true,
           title: true,
-          category: true,
           note: true,
           amount: true,
           type: true,
           occurredAt: true,
+          category: {
+            select: {
+              name: true,
+            },
+          },
         },
       });
     }
@@ -70,6 +76,7 @@ export default async function Home() {
       transactions={(transactions ?? []).map((transaction) => ({
         ...transaction,
         amount: Number(transaction.amount),
+        category: transaction.category.name,
         occurredAt: transaction.occurredAt.toISOString(),
       }))}
     />

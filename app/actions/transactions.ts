@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { unstable_rethrow } from "next/navigation";
 import { TransactionType } from "@/app/generated/prisma/enums";
+import { normalizeCategoryInput } from "@/lib/category";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logRuntimeError } from "@/lib/runtime-error";
@@ -59,15 +60,40 @@ export async function createTransactionAction(
       return { error: "Tipe transaksi tidak valid." };
     }
 
+    const normalizedCategory = normalizeCategoryInput(category);
+    const resolvedCategory = await prisma.category.upsert({
+      where: {
+        userId_slug: {
+          slug: normalizedCategory.slug,
+          userId: user.id,
+        },
+      },
+      update: {
+        icon: normalizedCategory.icon,
+        name: normalizedCategory.name,
+        type: normalizedCategory.type,
+      },
+      create: {
+        icon: normalizedCategory.icon,
+        name: normalizedCategory.name,
+        slug: normalizedCategory.slug,
+        type: normalizedCategory.type,
+        userId: user.id,
+      },
+    });
+
     const transaction = await prisma.transaction.create({
       data: {
         title,
-        category,
+        categoryId: resolvedCategory.id,
         note: note || null,
         amount,
         type,
         occurredAt: new Date(occurredAt),
         userId: user.id,
+      },
+      include: {
+        category: true,
       },
     });
 
@@ -76,7 +102,7 @@ export async function createTransactionAction(
     return {
       createdTransaction: {
         amount: Number(transaction.amount),
-        category: transaction.category,
+        category: transaction.category.name,
         id: transaction.id,
         note: transaction.note,
         occurredAt: transaction.occurredAt.toISOString(),
